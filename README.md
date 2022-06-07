@@ -1,6 +1,6 @@
 ![Alt text](/images/sdfp-sun-logo-01.png)
 
-## JagSki-2.0
+## Build Your Own Hydrographic Research Vessel
 A wiki for building your own hydrographic surveying vessel using a personal watercraft, following the design of the JagSki (created by Dr. Bret Webb, University of South Alabama).
 
 ## Tutorials
