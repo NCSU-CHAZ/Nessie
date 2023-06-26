@@ -1,4 +1,4 @@
-## Vertical Beam Notes
+## Notes
 The HydroSurveyor was moved to three locations throughout the flume and surveyed at 1 Hz for ~4 minutes at each location. The vertical beam results are shown below.
 
 <img width="710" alt="Screen Shot 2023-06-26 at 8 31 35 AM" src="https://github.com/NCSU-CHAZ/BYO-Hydrographic-RV/assets/113138977/9d6ec9c0-1ec2-4947-9efb-8a52de41a296">
@@ -9,6 +9,3 @@ _Figure 1: Wave flume vertical beam data table_
 
 _Figure 2: Measured depths vs vertical beam recorded depths_
 
-
-## Slanted Beam Notes
-At each location, depth measurements obtained from the vertical beam were compared to the measurements obtained from each of the four slanted beams.
