@@ -1,5 +1,5 @@
 
-<img width="714" alt="HStank" src="https://github.com/NCSU-CHAZ/BYO-Hydrographic-RV/assets/113138977/70b0d776-d791-492d-90c2-112e822c5d89">
+<img width="704" alt="Tanktable" src="https://github.com/NCSU-CHAZ/BYO-Hydrographic-RV/assets/113138977/7bf6b3d7-0ddd-4358-8aba-1f609c550f7b">
 
 _Figure 1: Wave flume vertical beam data tabl_
 
