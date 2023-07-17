@@ -8,7 +8,7 @@
 - For each trial, the median beam depth for each of the angled beams is compared to the vertical beam range, and the standard deviation for each angled beam is recorded
 
 ## Flume_test.m
-- Includs the code for both analyses
+- Includes the code for both analyses
 
 
   
