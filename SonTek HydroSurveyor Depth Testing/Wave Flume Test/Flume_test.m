@@ -198,19 +198,18 @@ end
 %--------------------------------------------------
 
 figure(1)
-sgtitle('Wave Flume Trial 1')
+sgtitle('Wave Flume Trial 1','FontSize',18)
 for i = 1:4
     subplot(2,2,i)
     ylim([50 250])
     xlim([1 240])
-    ylabel('Depth Range (cm)')
-    xlabel('Time (s)')
+    ylabel('Depth (cm)','FontSize',18)
+    xlabel('Time (s)','FontSize',18)
 
     std1 = [48.5 44.5 37.1 82.0];
-    leg2 = ['BT beam ',num2str(i),' Range (STD = ',num2str(std1(i)),' cm)'];
-    leg3 = ['Median beam ',num2str(i),' Range'];
-    legend('Vertical Beam Range',leg2,leg3)
-    grid on
+    leg2 = ['BT beam ',num2str(i),' Depth (STD = ',num2str(std1(i)),' cm)'];
+    leg3 = ['Median beam ',num2str(i),' Depth'];
+    legend('Vertical Beam Range',leg2,leg3,'FontSize',12)
 end
 
 subplot(224)
@@ -218,18 +217,18 @@ ylim([50 350])
 %--------------------------------------------------
 
 figure(2)
-sgtitle('Wave Flume Trial 2')
+sgtitle('Wave Flume Trial 2','FontSize',18)
 for i = 1:4
     subplot(2,2,i)
     ylim([50 175])
     xlim([1 240])
-    ylabel('Depth Range (cm)')
-    xlabel('Time (s)')
+    ylabel('Depth (cm)','FontSize',18)
+    xlabel('Time (s)','FontSize',18)
 
     std2 = [34.5 39.0 35.7 93.7];
-    leg2 = ['BT beam ',num2str(i),' Range (STD = ',num2str(std2(i)),' cm)'];
-    leg3 = ['Median beam ',num2str(i),' Range'];
-    legend('Vertical Beam Range',leg2,leg3)
+    leg2 = ['BT beam ',num2str(i),' Depth (STD = ',num2str(std2(i)),' cm)'];
+    leg3 = ['Median beam ',num2str(i),' Depth'];
+    legend('Vertical Beam Range',leg2,leg3,'FontSize',12)
     grid on
 end
 
@@ -238,18 +237,18 @@ ylim([50 400])
 %--------------------------------------------------
 
 figure(3)
-sgtitle('Wave Flume Trial 3')
+sgtitle('Wave Flume Trial 3','FontSize',18)
 for i = 1:4
     subplot(2,2,i)
     ylim([40 100])
     xlim([1 240])
-    ylabel('Depth Range (cm)')
-    xlabel('Time (s)')
+    ylabel('Depth (cm)','FontSize',18)
+    xlabel('Time (s)','FontSize',18)
 
     std3 = [9.37 19.6 19.3 62.8];
-    leg2 = ['BT beam ',num2str(i),' Range (STD = ',num2str(std3(i)),' cm)'];
-    leg3 = ['Median beam ',num2str(i),' Range',];
-    legend('Vertical Beam Range',leg2,leg3)
+    leg2 = ['BT beam ',num2str(i),' Depth (STD = ',num2str(std3(i)),' cm)'];
+    leg3 = ['Median beam ',num2str(i),' Depth',];
+    legend('Vertical Beam Range',leg2,leg3,'FontSize',12)
     grid on
 end
 
