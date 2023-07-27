@@ -109,6 +109,3 @@ xlabel('HydroSurveyor Recorded Average Depth (cm)','FontSize',18)
 ylabel('Measured Depth (cm)','FontSize',18)
 legend('Linear Regression line (y = 1.032*x-1.67)','y = x','Recorded Average vs Measured Depth','Location','Northwest','FontSize',18)
 title('Hydrosurveyor Tank Test','FontSize',18)
-
-
-
