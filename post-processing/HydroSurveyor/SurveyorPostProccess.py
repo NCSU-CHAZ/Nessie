@@ -1,5 +1,6 @@
 import numpy as np 
 from scipy.io import loadmat
+from scipy.interpolate import interp1d
 import pandas as pd
 import datetime as time
 import pytest
@@ -49,13 +50,51 @@ CellGrid = (rawdata['CellStart_m'] + (cellnum.reshape(3577,1)*rawdata['CellSize_
 CellGrid = CellGrid + .1651 
 
 #Remove Data below vertical beam range
-print(CellGrid.astype)
 dim = WaterEastVel.shape 
+CellGrid = np.tile(CellGrid, dim[1])
 mask = np.tile(rawdata['VbDepth_m'],dim[1])
 isbad = (CellGrid > mask)
 
 EastVel[isbad] = float('nan')
 NorthVel[isbad] = float('nan')
 VertVel[isbad] = float('nan')
-ErrVel[isbad] = float('nan')
+
+def cellsize_interp(vel_array, CellSize_m, CellGrid, Interpsize):
+    
+    #vel_array = Velocity array, size [Number of sample points]x[number of cells multiplied by four] four beams per cell
+    #CellSize_m = Vector telling the depth of the cells for each data measurement as HydroSurveyor changes cellsize depending on depth
+    #CellGrid = Matrix of cell depths, same size as vel_array
+    #Interpsize = This number decides which cell size to interpolate to i.e. if you have 6 cell sizes [.05 .1 .3 .5 .65 2] you
+    #             pick which cell size to interpolate to. 
+
+    # Determine dimensions and unique cell sizes
+    dimension = CellGrid.shape[1]
+    varCellSize = np.unique(CellSize_m)
+
+    targetCellSize = varCellSize[Interpsize - 1] # Pick out the cell size you interpolate to (-1 because of python indexing)
+    cellinds = np.where(CellSize_m == targetCellSize)[0] #Indexes for which data points where measured at the target cell size
+    interpCellDepth = CellGrid[cellinds[0], :] # Acquires the cells from the grid that used the targeted cell size  
+
+    # Initialize the interpolated velocity array
+    vel_interp = np.copy(vel_array)
+
+    # Perform interpolation
+    for jj in varCellSize:
+        inds = np.where(CellSize_m == jj)[0] #Get the indexes for which datapoints are at one of the cellsizes
+        for i in inds:
+            loc = CellGrid[i, :] #Gets the depth row of data points 
+            value = vel_interp[i, :] #Gets the velocity points in the row
+            f = interp1d(loc[:dimension], value) #Interpolates the depths as a function of velocity
+            newval = f(interpCellDepth) #Gets t
+            vel_interp[i, :] = newval
+
+    return vel_interp, interpCellDepth
+
+EastVel_interp, interpCellDepth = cellsize_interp(EastVel,rawdata['CellSize_m'],CellGrid,2)
+NorthVel_interp, interpCellDepth = cellsize_interp(NorthVel,rawdata['CellSize_m'],CellGrid,2)
+VertVel_interp, interpCellDepth = cellsize_interp(VertVel,rawdata['CellSize_m'],CellGrid,2)
+
+EastVel = EastVel_interp
+NorthVel = NorthVel_interp
+VertVel = VertVel_interp
 
