@@ -1,40 +1,57 @@
 import numpy as np 
-import scipy as sp
+from scipy.io import loadmat
 import pandas as pd
 import datetime as time
+import pytest
+import matplotlib.pyplot as plt
 
-velpath = r"C:\Users\lwlav\OneDrive\Documents\Summer 2024 CHAZ\Data\M9Hydro_csvData\M9_HydroSurveyor - WaterVelocityXyz_m_s.csv" 
-        # r in front of the filepath lets PYTHON know the string is raw, this means it will interpret the \ literally
-data = pd.read_csv(velpath, header=0)   #Pandas library reads in data, identifies first row as column titles i.e. Header
-WaterVelXYZ = pd.DataFrame(data)   # m/s                   
+#Import .mat files 
+def readin(filepath) :
+        rawdata = loadmat(filepath)
+        del rawdata['__header__'] ; del rawdata['__version__'] ; del rawdata['__globals__']; del rawdata['Info'] #Delete unnecessary keys
+        data = {}
+        for i in rawdata.keys() :
+                array = rawdata[i]
+                if rawdata[i].ndim == 3 :      #Flatten 3d arrays into 2d arrays
+                        reshaped = array.reshape(array.shape[0],-1)   
+                        data[i] = pd.DataFrame(reshaped)
+                else :
+                        data[i] = pd.DataFrame(array)
+        return data
 
-# Pandas converts data into workable datastructure with the headers as 
-# [Date/Time, Cell1_HydroSurveyor - WaterVelocityXyz_1, Cell1_HydroSurveyor - WaterVelocityXyz_2, Cell1_HydroSurveyor - WaterVelocityXyz_3,
-#  Cell1_HydroSurveyor - WaterVelocityXyz_4,  Cell2_HydroSurveyor - WaterVelocityXyz_1 ... Cell85_HydroSurveyor - WaterVelocityxyz_4]  
-# This can be viewed with print(velXYZ.keys())
-# It is my current understanding that for each cell WaterVelocityXyz_1 is east,  WaterVelocityXyz_2 is North
-# WaterVelocityXyz_3 is vertical,  WaterVelocityXyz_4 is error
 
-pd.to_datetime(WaterVelXYZ["Date/Time"], format='%Y-%m-%d %H:%M:%S.%f') #Converts the string of date times into datetime objects
-
-trackpath = r"C:\Users\lwlav\OneDrive\Documents\Summer 2024 CHAZ\Data\M9Hydro_csvData\M9_HydroSurveyor - BottomTrack_m_s.csv"
-btTrackXYZ = pd.DataFrame(pd.read_csv(trackpath,header=0)) # Headers are [Date/Time, HydroSurveyor - BottomTrack_1, ..., HydroSurveyor - BottomTrack_4]
-pd.to_datetime(btTrackXYZ["Date/Time"], format='%Y-%m-%d %H:%M:%S.%f')
+rawdata = readin(r"C:\Users\lwlav\OneDrive\Documents\Summer 2024 CHAZ\Data\Survey_ICW_20240520_raw.mat")
 
 #Acquire individual direction dataframes
-WaterEastVel = WaterVelXYZ[WaterVelXYZ.columns[1::4]] 
-WaterNorthVel = WaterVelXYZ[WaterVelXYZ.columns[2::4]]
-WaterVertVel = WaterVelXYZ[WaterVelXYZ.columns[3::4]]
-WaterErrVel = WaterVelXYZ[WaterVelXYZ.columns[::4]]
+WaterEastVel = rawdata['WaterVelEnu_m_s'].iloc[:, 0::4] 
+WaterNorthVel = rawdata['WaterVelEnu_m_s'].iloc[:,1::4]
+WaterVertVel = rawdata['WaterVelEnu_m_s'].iloc[:, 2::4]
+WaterErrVel = rawdata['WaterVelEnu_m_s'].iloc[:, 3::4]
 
 #Reinsert Datetime vectors back in to dataframes
-WaterEastVel.insert(0, 'Date/Time', WaterVelXYZ['Date/Time']) 
-WaterNorthVel.insert(0, 'Date/Time', WaterVelXYZ['Date/Time']) 
-WaterVertVel.insert(0, 'Date/Time', WaterVelXYZ['Date/Time']) 
+# WaterEastVel.insert(0, 'DateTime', rawdata['DateTime']) 
+# WaterNorthVel.insert(0, 'DateTime', rawdata['DateTime']) 
+# WaterVertVel.insert(0, 'DateTime', rawdata['DateTime']) 
 
 #Correct by subtracting bottom track velocities, these are not the same length so be sure to revisit 
-EastVel = WaterEastVel - btTrackXYZ['HydroSurveyor - BottomTrack_1']
-NorthVel = WaterNorthVel - btTrackXYZ['HydroSurveyor - BottomTrack_2']
-VertVel = WaterVertVel -  btTrackXYZ['HydroSurveyor - BottomTrack_3']
-ErrVel = WaterErrVel - btTrackXYZ['HydroSurveyor - BottomTrack_4']
+EastVel = WaterEastVel.subtract(rawdata['BtVelEnu_m_s'].iloc[:, 0],axis=0)
+NorthVel = WaterNorthVel.subtract(rawdata['BtVelEnu_m_s'].iloc[:, 1],axis=0)
+VertVel = WaterVertVel.subtract(rawdata['BtVelEnu_m_s'].iloc[:, 2],axis=0)
+ErrVel = np.sqrt(1/(1/(WaterErrVel**2) + (1/(rawdata['BtVelEnu_m_s'].iloc[:, 3]**2)))) #This might not be the best way to perserve error values
+
+#Correct for vertical beam ranges
+cellnum = np.linspace(0,len(rawdata['CellSize_m']),(len(rawdata['CellSize_m'])))
+CellGrid = (rawdata['CellStart_m'] + (cellnum.reshape(3577,1)*rawdata['CellSize_m']))
+CellGrid = CellGrid + .1651 
+
+#Remove Data below vertical beam range
+print(CellGrid.astype)
+dim = WaterEastVel.shape 
+mask = np.tile(rawdata['VbDepth_m'],dim[1])
+isbad = (CellGrid > mask)
+
+EastVel[isbad] = float('nan')
+NorthVel[isbad] = float('nan')
+VertVel[isbad] = float('nan')
+ErrVel[isbad] = float('nan')
 
