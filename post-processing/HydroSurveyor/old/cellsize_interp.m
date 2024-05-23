@@ -20,7 +20,7 @@ function [vel_interp,interpCellDepth] = cellsize_interp(vel_array,CellSize_m,Cel
 dimensions = size(CellGrid);
 dimension = dimensions(2); %cobtains number of cells
 varCellSize = unique(CellSize_m); % Obtains all the unique cell sizes in a data set
-% varCellSize = varCellSize(2:end); % removes the smallest cell size from the variable
+varCellSize = varCellSize(2:end); % removes the smallest cell size from the variable
 
 if Interpsize == 1 % interpolate to smallest cell size
     cellinds = find(CellSize_m == min(CellSize_m)); % Finds which times (indicies) crrespond to the minimum cell size

@@ -4,6 +4,17 @@ import pandas as pd
 import datetime as time
 from mat_readin import mat_readin
 
+
+def nanhelp(y):
+    """ Helper function to help determine indices of nan values, this is helpful for interpolation
+    y: 1d numpy array containing nan values
+    
+    nans: logical indices of nans
+    ids: indices of nan values
+    """
+    nans = np.isnan(y)
+    return nans, lambda z: z.nonzero()[0]
+
 #Function for interpolating cellsize
 def cellsize_interp(vel_array, CellSize_m, CellGrid, Interpsize):
     
@@ -16,25 +27,26 @@ def cellsize_interp(vel_array, CellSize_m, CellGrid, Interpsize):
     # Determine dimensions and unique cell sizes
     dimension = CellGrid.shape[1]
     varCellSize = np.unique(CellSize_m)
-
-
     targetCellSize = varCellSize[Interpsize - 1] # Pick out the cell size you interpolate to (-1 because of python indexing)
+    varCellSize = np.delete(varCellSize,Interpsize - 1) #Remove the target cell size from the variables list
     cellinds = np.where(CellSize_m == targetCellSize)[0] #Indexes for which data points where measured at the target cell size
-    interpCellDepth = CellGrid[cellinds[0], :] # Acquires the cells from the grid that used the targeted cell size
-
+    interpCellDepth = CellGrid[cellinds[0], :] # Acquires the cells from the grid that used the targeted cell size  
+    
     # Initialize the interpolated velocity array
+
     vel_interp = np.copy(vel_array)
+    # Perform interpolation
 
     # Perform interpolation
     for jj in varCellSize:
-        inds = np.where(CellSize_m == jj)[0] #Get the indexes for which datapoints are at one of the cellsizes
+        inds = np.where(CellSize_m == jj)[0]  # Get the indices for which data points are at one of the cell sizes
         for i in inds:
-            loc = CellGrid[i, :] #Gets the depth row of data points 
-            value = vel_interp[i, :] #Gets the velocity points in the row
-            f = interp1d(loc[:dimension], value, bounds_error=False, fill_value="extrapolate") #Interpolates the depths as a function of velocity
-            newval = f(interpCellDepth) #Gets th
-            vel_interp[i, :] = newval
-
+            value = vel_interp[i, :]  # Gets the velocity points in the row
+            loc, x = nanhelp(value)
+            if np.any(~loc):
+                f = interp1d(x(~loc), value[~loc], bounds_error=False, fill_value=np.nan)
+                vel_interp[i, :] = f(np.arange(len(value)))
+    
     return vel_interp, interpCellDepth
 
 #Main post_processing function
@@ -46,26 +58,23 @@ def post_process(filepath) :
     VertVel = WaterVertVel.subtract(rawdata['BtVelEnu_m_s'].iloc[:, 2],axis=0)
 
     #Correct for vertical beam ranges
-    cellnum = np.linspace(0,len(rawdata['CellSize_m']),(len(rawdata['CellSize_m'])))
-    CellGrid = (rawdata['CellStart_m'] + (cellnum.reshape(3577,1)*rawdata['CellSize_m']))
+    cellnum = np.arange(0,WaterEastVel.shape[1])
+    CellGrid = np.outer(cellnum,rawdata['CellSize_m'])
+    CellGrid = np.add(rawdata['CellStart_m'].to_numpy(),(CellGrid.swapaxes(0,1)))
     CellGrid = CellGrid + .1651 
 
     #Remove Data below vertical beam range
     dim = WaterEastVel.shape 
-    CellGrid = np.tile(CellGrid, dim[1])
-    mask = np.tile(rawdata['VbDepth_m'],dim[1])
+    mask = np.tile(rawdata['VbDepth_m'],(1, dim[1]))
     isbad = (CellGrid > mask)
 
-    EastVel[isbad] = float('nan')
-    NorthVel[isbad] = float('nan')
-    VertVel[isbad] = float('nan')
+    EastVel[isbad] = np.nan
+    NorthVel[isbad] = np.nan
+    VertVel[isbad] = np.nan
 
     EastVel_interp, interpCellDepth = cellsize_interp(EastVel,rawdata['CellSize_m'],CellGrid,2)
     NorthVel_interp, interpCellDepth = cellsize_interp(NorthVel,rawdata['CellSize_m'],CellGrid,2)
     VertVel_interp, interpCellDepth = cellsize_interp(VertVel,rawdata['CellSize_m'],CellGrid,2)
 
-    EastVel = EastVel_interp
-    NorthVel = NorthVel_interp
-    VertVel = VertVel_interp
+    return EastVel_interp, NorthVel_interp, VertVel_interp, rawdata
 
-    return EastVel, NorthVel, VertVel, rawdata
