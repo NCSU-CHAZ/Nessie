@@ -2,9 +2,8 @@ import numpy as np
 from scipy.io import loadmat
 from scipy.interpolate import interp1d
 import pandas as pd
-import datetime 
-import pytest
-import matplotlib.pyplot as plt
+import datetime as dt
+import math
 
 
 def nanhelp(y):
@@ -108,3 +107,17 @@ EastVel_interp, interpCellDepth = cellsize_interp(EastVel,rawdata['CellSize_m'],
 NorthVel_interp, interpCellDepth = cellsize_interp(NorthVel,rawdata['CellSize_m'],CellGrid,2)
 VertVel_interp, interpCellDepth = cellsize_interp(VertVel,rawdata['CellSize_m'],CellGrid,2)
 
+def dtnum_dttime(time_array) :
+        dates = []
+        DT = time_array.to_numpy()
+        for ordinal in DT :
+                ordinal = ordinal/(1*10^6)/(86400)
+                integer = math.floor(ordinal)
+                frac = ordinal - integer
+                date = dt.datetime.fromordinal(integer)
+                time = dt.timedelta(days=frac)
+                full = date + time
+                dates.append(full)
+        return dates
+
+dt = dtnum_dttime(rawdata['DateTime'])
