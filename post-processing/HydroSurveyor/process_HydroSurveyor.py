@@ -2,8 +2,8 @@ import numpy as np
 from scipy.interpolate import interp1d
 import pandas as pd
 import datetime as dt
-from mat_readin import mat_readin
-
+from read_HydroSurveyor import vector_df
+from math import floor
 
 def nanhelp(y):
     """ Helper function to help determine indices of nan values, this is helpful for interpolation
@@ -14,6 +14,21 @@ def nanhelp(y):
     """
     nans = np.isnan(y)
     return nans, lambda z: z.nonzero()[0]
+
+def dtnum_dttime(time_array) :
+         dates = []
+         DT = time_array.to_numpy()
+         DT = DT/(1*10**6)/(86400) + 730486 #Convert fron hydrosurveyor time which is microseconds since Jan 01 2000 (or in datenum 730486)
+         for ordinal in DT :
+                 integer = floor(ordinal[0])
+                 frac = ordinal - integer
+                 date = dt.datetime.fromordinal(integer)
+                 time = dt.timedelta(days=frac[0])
+                 mat_correction = dt.timedelta(days=366)
+                 full = date + time - mat_correction
+                 dates.append(full)
+         return dates
+
 
 #Function for interpolating cellsize
 def cellsize_interp(vel_array, CellSize_m, CellGrid, Interpsize):
@@ -50,13 +65,13 @@ def cellsize_interp(vel_array, CellSize_m, CellGrid, Interpsize):
     return vel_interp, interpCellDepth
 
 #Main post_processing function
-def post_process(filepath) :
-    rawdata, WaterEastVel, WaterNorthVel, WaterVertVel, WaterErrVel = mat_readin(filepath)
+def Hydro_process(filepath) :
+    rawdata, WaterEastVel, WaterNorthVel, WaterVertVel, WaterErrVel, Info = vector_df(filepath)
 
     EastVel = WaterEastVel.subtract(rawdata['BtVelEnu_m_s'].iloc[:, 0],axis=0)
     NorthVel = WaterNorthVel.subtract(rawdata['BtVelEnu_m_s'].iloc[:, 1],axis=0)
     VertVel = WaterVertVel.subtract(rawdata['BtVelEnu_m_s'].iloc[:, 2],axis=0)
-
+    BtErrVal = rawdata['BtVelEnu_m_s'].iloc[:,3]
     #Correct for vertical beam ranges
     cellnum = np.arange(0,WaterEastVel.shape[1])
     CellGrid = np.outer(cellnum,rawdata['CellSize_m'])
@@ -76,5 +91,9 @@ def post_process(filepath) :
     NorthVel_interp, interpCellDepth = cellsize_interp(NorthVel,rawdata['CellSize_m'],CellGrid,2)
     VertVel_interp, interpCellDepth = cellsize_interp(VertVel,rawdata['CellSize_m'],CellGrid,2)
 
-    return EastVel_interp, NorthVel_interp, VertVel_interp, rawdata 
+    dates = dtnum_dttime(rawdata['DateTime'])
+
+    Data = {'EastVel_interp':EastVel_interp, 'NorthVel_interp':NorthVel_interp, 'VertVel_interp':VertVel_interp, 'interpCellDepth':interpCellDepth, 
+            'EastVel':EastVel, 'NorthVel':NorthVel, 'VertVel':VertVel,'CellGrid':CellGrid, 'BtErrVal':BtErrVal, 'DateTime':dates, 'Info':Info}
+    return Data 
 
