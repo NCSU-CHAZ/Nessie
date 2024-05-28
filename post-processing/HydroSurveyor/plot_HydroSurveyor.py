@@ -44,12 +44,12 @@ def auto_process_comparison(AutoData, Data):
     DT = dtnum_dttime(AutoData['HydroSurveyor_WaterVelocityXyz_Corrected_DateTime'])
 
     fig, axs = plt.subplots(2)
-    axs[0].plot(Data['DateTime'], int_velN, label = 'CHAZ Processing')
+    axs[0].plot(Data['DateTime'], int_velN,color = 'green', label = 'CHAZ Processing')
     axs[1].plot(DT, auto_velN, label = 'HydroSurveyors Processing')
     fig.supxlabel("Time (DD HH:MM)")
     fig.supylabel("Velocity (m/s)")
     fig.suptitle("Interpolated Velocities vs Time")
     fig.legend()
-    fig.show()
+    plt.show()
 
 auto_process_comparison(AutoData, Data)
