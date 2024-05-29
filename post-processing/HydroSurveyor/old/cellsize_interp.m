@@ -66,7 +66,7 @@ if length(varCellSize) == 1
         value = vel_interp(inds2(i),:);
         newloc = interpCellDepth;
         newval = interp1(loc(1:dimension),value,newloc);
-        vel_interp(inds2(i),:) = newval;
+        vel_interp(inds2(i),:) = newval; 
     end
 
 

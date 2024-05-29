@@ -120,4 +120,6 @@ def dtnum_dttime(time_array) :
                 dates.append(full)
         return dates
 
-dt = dtnum_dttime(rawdata['DateTime'])
+print(rawdata.keys())
+
+#qcVel = qc_check(Vel_East, ,rawdata['Frequency'],)
