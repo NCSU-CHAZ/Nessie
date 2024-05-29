@@ -40,7 +40,6 @@ def cellsize_interp(vel_array, CellSize_m, CellGrid, Interpsize):
     #             pick which cell size to interpolate to. 
 
     # Determine dimensions and unique cell sizes
-    dimension = CellGrid.shape[1]
     varCellSize = np.unique(CellSize_m)
     targetCellSize = varCellSize[Interpsize - 1] # Pick out the cell size you interpolate to (-1 because of python indexing)
     varCellSize = np.delete(varCellSize,Interpsize - 1) #Remove the target cell size from the variables list
@@ -57,8 +56,8 @@ def cellsize_interp(vel_array, CellSize_m, CellGrid, Interpsize):
         inds = np.where(CellSize_m == jj)[0]  # Get the indices for which data points are at one of the cell sizes
         for i in inds:
             value = vel_interp[i, :]  # Gets the velocity points in the row
-            loc, x = nanhelp(value)
-            if np.any(~loc):
+            loc, x = nanhelp(value) 
+            if np.any(~loc): 
                 f = interp1d(x(~loc), value[~loc], bounds_error=False, fill_value=np.nan)
                 vel_interp[i, :] = f(np.arange(len(value)))
     
@@ -66,7 +65,7 @@ def cellsize_interp(vel_array, CellSize_m, CellGrid, Interpsize):
 
 #Main post_processing function
 def Hydro_process(filepath) :
-    rawdata, WaterEastVel, WaterNorthVel, WaterVertVel, WaterErrVel, Info = vector_df(filepath)
+    rawdata, WaterEastVel, WaterNorthVel, WaterVertVel, WaterErrVal, Info = vector_df(filepath)
 
     EastVel = WaterEastVel.subtract(rawdata['BtVelEnu_m_s'].iloc[:, 0],axis=0)
     NorthVel = WaterNorthVel.subtract(rawdata['BtVelEnu_m_s'].iloc[:, 1],axis=0)
@@ -93,7 +92,7 @@ def Hydro_process(filepath) :
 
     dates = dtnum_dttime(rawdata['DateTime'])
 
-    Data = {'EastVel_interp':EastVel_interp, 'NorthVel_interp':NorthVel_interp, 'VertVel_interp':VertVel_interp, 'interpCellDepth':interpCellDepth, 
+    Data = {'EastVel_interp':EastVel_interp, 'NorthVel_interp':NorthVel_interp, 'VertVel_interp':VertVel_interp,'WaterErrVal':WaterErrVal, 'interpCellDepth':interpCellDepth, 
             'EastVel':EastVel, 'NorthVel':NorthVel, 'VertVel':VertVel,'CellGrid':CellGrid, 'BtErrVal':BtErrVal, 'DateTime':dates, 'Info':Info}
     return Data 
 

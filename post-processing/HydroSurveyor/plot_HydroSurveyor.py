@@ -38,11 +38,11 @@ def interpolated_comparison_plot(Data):
     plt.legend()
     plt.show()
 
-def auto_process_comparison(AutoData, Data):
+def auto_manual_comparison(AutoData, Data):
     auto_velN = np.nanmean(AutoData['HydroSurveyor_WaterVelocityXyz_Corrected_m_s'].iloc[:, 1::4], axis=0)
     int_velN = np.nanmean(Data['NorthVel_interp'], axis =1)
+    err = np.nanmean(AutoData['HydroSurveyor_AdpSnr_dB'])
     DT = dtnum_dttime(AutoData['HydroSurveyor_WaterVelocityXyz_Corrected_DateTime'])
-
     fig, axs = plt.subplots(2)
     axs[0].plot(Data['DateTime'], int_velN,color = 'green', label = 'CHAZ Processing')
     axs[1].plot(DT, auto_velN, label = 'HydroSurveyors Processing')
@@ -52,4 +52,25 @@ def auto_process_comparison(AutoData, Data):
     fig.legend()
     plt.show()
 
-auto_process_comparison(AutoData, Data)
+def error_plots(AutoData, Data) :
+    DT = dtnum_dttime(AutoData['HydroSurveyor_WaterVelocityXyz_Corrected_DateTime'])
+    WaterErr = np.nanmean(Data['WaterErrVal'],axis=1)
+    HydroErr = np.nanmean(AutoData['HydroSurveyor_WaterVelocityXyz_Corrected_m_s'].iloc[:, 3::4], axis = 0)
+    plt.figure()
+    plt.plot(Data['DateTime'], WaterErr,color = 'Green', label = 'WaterVelocity Error')
+    plt.plot(Data['DateTime'], Data['BtErrVal'], color = 'Blue', label = 'Bottom Track Error')
+    plt.plot(DT, HydroErr, label = 'HydroSurveyor Error')
+    plt.legend()
+    plt.show()
+
+
+#print(AutoData.keys())
+
+#raw_comparison_plot(Data)
+
+#interpolated_comparison_plot(Data)
+
+auto_manual_comparison(AutoData, Data)
+
+#error_plots(AutoData, Data)
+
