@@ -48,7 +48,7 @@ DepAvgVel_North = nanmean(Vel_North');
 
 %% Load in ADCP stuff
 % needs to be the full path to the aquadopp data. 
-load('CMS42504_L0.mat')
+load('CMS52002_L0.mat')
 
 ADCP_vel_east_DA = nanmean(v1');
 ADCP_vel_east_DA(5000:end) = nan;
@@ -61,18 +61,18 @@ DATE = datetime(date,'ConvertFrom','datenum');
 figure(1);clf;
 
 subplot(311)
-plot(Time,DA_u,'k',LineWidth=2)
+plot(DateTime,DA_u,'k',LineWidth=2)
 ylabel('Depth Avg Vel E',FontSize=14)
-hold on;plot(Time,DepAvgVel_East,'r',LineWidth=2.5)
+hold on;plot(DateTime,DepAvgVel_East,'r',LineWidth=2.5)
 plot(DATE,ADCP_vel_east_DA,'b',LineWidth=1)
 grid on
 title('Velocity East',FontSize=14)
 legend('Raw','BT Corrected','ADCP Measured','FontSize',14,'Location','Northwest')
 
 subplot(312)
-plot(Time,DA_v,'k',LineWidth=2)
+plot(DateTime,DA_v,'k',LineWidth=2)
 ylabel('Depth Avg Vel N',FontSize=14)
-hold on;plot(Time,DepAvgVel_North','r',LineWidth=2.5)
+hold on;plot(DateTime,DepAvgVel_North','r',LineWidth=2.5)
 plot(DATE,ADCP_vel_north_DA,'b',LineWidth=1)
 title('Velocity North',FontSize=14)
 grid on
@@ -81,7 +81,7 @@ legend('Raw','BT Corrected','ADCP Measured','FontSize',14,'Location','Northwest'
 
 subplot(313)
 ylabel('Depth Avg Vel N',FontSize=14)
-plot(Time,DepAvgVel_North','r',LineWidth=2.5)
+plot(DateTime,DepAvgVel_North','r',LineWidth=2.5)
 hold on;plot(DATE,ADCP_vel_north_DA,'b',LineWidth=1)
 title('Velocity North (Zoomed in Section)',FontSize=14)
 grid on
@@ -101,10 +101,10 @@ sgtitle('Velocity Profile Time Series')
 cm = cmocean('balance');
 subplot(311)
 
-a = pcolor(Time,interpCellDepth,Vel_East');
+a = pcolor(DateTime,interpCellDepth,Vel_East');
 
 hold on
-floor = plot(Time,VbDepth_m,'k','LineWidth',3);
+floor = plot(DateTime,VbDepth_m,'k','LineWidth',3);
 set(a,'EdgeColor','none')
 set(gca, 'YDir','reverse')
 colorbar
@@ -118,9 +118,9 @@ title('East',FontSize=14)
 grid on
 
 subplot(312)
-b = pcolor(Time,interpCellDepth,Vel_North');
+b = pcolor(DateTime,interpCellDepth,Vel_North');
 hold on
-floor = plot(Time,VbDepth_m,'k','LineWidth',3);
+floor = plot(DateTime,VbDepth_m,'k','LineWidth',3);
 set(b,'EdgeColor','none')
 set(gca, 'YDir','reverse')
 colorbar
@@ -140,9 +140,9 @@ ylim([0 max(VbDepth_m)+0.5])
 
 
 subplot(313)
-c = pcolor(Time,interpCellDepth,Vel_Vert');
+c = pcolor(DateTime,interpCellDepth,Vel_Vert');
 hold on
-floor = plot(Time,VbDepth_m,'k','LineWidth',3);
+floor = plot(DateTime,VbDepth_m,'k','LineWidth',3);
 set(c,'EdgeColor','none')
 set(gca, 'YDir','reverse')
 colorbar
@@ -151,7 +151,7 @@ caxis([-0.2 0.2])
 ylabel('Water Depth (m)',FontSize=14)
 ylabel(colorbar,'Vert. Velocity (m/s)',FontSize=14)
 ylim([0 max(VbDepth_m)+0.5])
-%xlabel('Time (s)')
+%xlabel('DateTime (s)')
 title('Vertical',FontSize=14)
 %legend('Velocity Profile','Bottom Depth','location','southeast')
 grid on
@@ -200,10 +200,10 @@ Northing_rot = EastingZero*sind(rot_theta)+NorthingZero*cosd(rot_theta);
 % % % % Time(1);
 % % % % DATE(5000);
 
-% DepAVGInterp = interp1(DATE,ADCP_vel_north_DA,Time)
+% DepAVGInterp = interp1(DATE,ADCP_vel_north_DA,DateTime)
 
-cross_Time = Time(19:2910)
-cross_DepAVG = DepAVGInterp(19:2910)
+cross_Time = DateTime(19:2910);
+cross_DepAVG = DepAVGInterp(19:2910);
 
 cross_DATE = DATE(2090:4981);
 cross_ADCP = ADCP_vel_north_DA(2090:4981)';

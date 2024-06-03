@@ -4,7 +4,7 @@ from scipy.interpolate import interp1d
 import pandas as pd
 import datetime as dt
 import math
-
+import matplotlib.pyplot as plt
 
 def nanhelp(y):
     """ Helper function to help determine indices of nan values, this is helpful for interpolation
@@ -103,23 +103,54 @@ def cellsize_interp(vel_array, CellSize_m, CellGrid, Interpsize):
     
     return vel_interp, interpCellDepth
 
-EastVel_interp, interpCellDepth = cellsize_interp(EastVel,rawdata['CellSize_m'],CellGrid,1)
-NorthVel_interp, interpCellDepth = cellsize_interp(NorthVel,rawdata['CellSize_m'],CellGrid,2)
-VertVel_interp, interpCellDepth = cellsize_interp(VertVel,rawdata['CellSize_m'],CellGrid,2)
+# EastVel_interp, interpCellDepth = cellsize_interp(EastVel,rawdata['CellSize_m'],CellGrid,1)
+# NorthVel_interp, interpCellDepth = cellsize_interp(NorthVel,rawdata['CellSize_m'],CellGrid,2)
+# VertVel_interp, interpCellDepth = cellsize_interp(VertVel,rawdata['CellSize_m'],CellGrid,2)
+from math import floor
 
 def dtnum_dttime(time_array) :
-        dates = []
-        DT = time_array.to_numpy()
-        for ordinal in DT :
-                ordinal = ordinal/(1*10^6)/(86400)
-                integer = math.floor(ordinal)
-                frac = ordinal - integer
-                date = dt.datetime.fromordinal(integer)
-                time = dt.timedelta(days=frac)
-                full = date + time
-                dates.append(full)
-        return dates
-
-print(rawdata.keys())
+         dates = []
+         DT = time_array.to_numpy()
+         DT = DT/(1*10**6)/(86400) + 730486 #Convert fron hydrosurveyor time which is microseconds since Jan 01 2000 (or in datenum 730486)
+         for ordinal in DT :
+                 integer = floor(ordinal[0])
+                 frac = ordinal - integer
+                 date = dt.datetime.fromordinal(integer)
+                 time = dt.timedelta(days=frac[0])
+                 mat_correction = dt.timedelta(days=366)
+                 full = date + time - mat_correction
+                 dates.append(full)
+         return dates
+#print(rawdata.keys())
 
 #qcVel = qc_check(Vel_East, ,rawdata['Frequency'],)
+
+
+
+varCellSize = np.unique(rawdata['CellSize_m'])
+varCellSize = np.delete(varCellSize, 0)
+targetCellSize = varCellSize[2 - 1] # Pick out the cell size you interpolate to (-1 because of python indexing)
+varCellSize = np.delete(varCellSize,2- 1) #Remove the target cell size from the variables list
+cellinds = np.where(rawdata['CellSize_m'] == targetCellSize)[0] #Indexes for which data points where measured at the target cell size
+interpCellDepth = CellGrid[cellinds[0],:]
+
+vel_interp = np.copy(EastVel)
+    # Perform interpolation
+
+    # Perform interpolation
+for jj in varCellSize:
+        inds = np.where(rawdata['CellSize_m'] == jj)[0]  # Get the indices for which data points are at one of the cell sizes
+        for i in inds:
+            value = vel_interp[i, :]  # Gets the velocity points in the row
+            whichlocs = CellGrid[i,:]
+            nanloc, x = nanhelp(value)
+            if np.any(~nanloc):
+                f = interp1d(whichlocs[~nanloc], value[~nanloc], bounds_error=False, fill_value=np.nan)
+                vel_interp[i, :] = f(interpCellDepth)
+
+DateTime = dtnum_dttime(rawdata['DateTime'])
+
+plt.figure()
+plt.pcolormesh(DateTime,interpCellDepth,vel_interp.T, shading = 'nearest')
+plt.plot(DateTime,rawdata['VbDepth_m'])
+plt.show()

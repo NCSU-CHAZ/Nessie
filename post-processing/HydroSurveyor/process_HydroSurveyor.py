@@ -42,6 +42,7 @@ def cellsize_interp(vel_array, CellSize_m, CellGrid, Interpsize):
 
     # Determine dimensions and unique cell sizes
     varCellSize = np.unique(CellSize_m)
+    varCellSize = np.delete(varCellSize, 0) #Remove  the smallest cell size
     targetCellSize = varCellSize[Interpsize - 1] # Pick out the cell size you interpolate to (-1 because of python indexing)
     varCellSize = np.delete(varCellSize,Interpsize - 1) #Remove the target cell size from the variables list
     cellinds = np.where(CellSize_m == targetCellSize)[0] #Indexes for which data points where measured at the target cell size
@@ -50,17 +51,17 @@ def cellsize_interp(vel_array, CellSize_m, CellGrid, Interpsize):
     # Initialize the interpolated velocity array
 
     vel_interp = np.copy(vel_array)
-    # Perform interpolation
-
+  
     # Perform interpolation
     for jj in varCellSize:
         inds = np.where(CellSize_m == jj)[0]  # Get the indices for which data points are at one of the cell sizes
         for i in inds:
             value = vel_interp[i, :]  # Gets the velocity points in the row
-            loc, x = nanhelp(value) 
-            if np.any(~loc): 
-                f = interp1d(x(~loc), value[~loc], bounds_error=False, fill_value=np.nan)
-                vel_interp[i, :] = f(np.arange(len(value)))
+            whichlocs = CellGrid[i,:]
+            nanloc, x = nanhelp(value); del x
+            if np.any(~nanloc):
+                f = interp1d(whichlocs[~nanloc], value[~nanloc], bounds_error=False, fill_value= np.nan)
+                vel_interp[i, :] = f(interpCellDepth)
     
     return vel_interp, interpCellDepth
 
@@ -71,7 +72,7 @@ def Hydro_process(filepath) :
     EastVel = WaterEastVel.subtract(rawdata['BtVelEnu_m_s'].iloc[:, 0],axis=0)
     NorthVel = WaterNorthVel.subtract(rawdata['BtVelEnu_m_s'].iloc[:, 1],axis=0)
     VertVel = WaterVertVel.subtract(rawdata['BtVelEnu_m_s'].iloc[:, 2],axis=0)
-    BtErrVal = rawdata['BtVelEnu_m_s'].iloc[:,3]
+    BtVel = rawdata['BtVelEnu_m_s']
     #Correct for vertical beam ranges
     cellnum = np.arange(0,WaterEastVel.shape[1])
     CellGrid = np.outer(cellnum,rawdata['CellSize_m'])
@@ -83,9 +84,9 @@ def Hydro_process(filepath) :
     mask = np.tile(rawdata['VbDepth_m'],(1, dim[1]))
     isbad = (CellGrid > mask)
 
-    EastVel[isbad] = np.nan
-    NorthVel[isbad] = np.nan
-    VertVel[isbad] = np.nan
+    EastVel[isbad] = float('NaN')
+    NorthVel[isbad] = float('NaN')
+    VertVel[isbad] = float('NaN')
 
     EastVel_interp, interpCellDepth = cellsize_interp(EastVel,rawdata['CellSize_m'],CellGrid,2)
     NorthVel_interp, interpCellDepth = cellsize_interp(NorthVel,rawdata['CellSize_m'],CellGrid,2)
@@ -94,16 +95,6 @@ def Hydro_process(filepath) :
     dates = dtnum_dttime(rawdata['DateTime'])
 
     Data = {'EastVel_interp':EastVel_interp, 'NorthVel_interp':NorthVel_interp, 'VertVel_interp':VertVel_interp,'WaterErrVal':WaterErrVal, 'interpCellDepth':interpCellDepth, 
-            'EastVel':EastVel, 'NorthVel':NorthVel, 'VertVel':VertVel,'CellGrid':CellGrid, 'BtErrVal':BtErrVal, 'DateTime':dates, 'Info':Info}
+            'EastVel':EastVel, 'NorthVel':NorthVel, 'VertVel':VertVel,'CellGrid':CellGrid, 'BtVel':BtVel, 'DateTime':dates, 'CellSize_m':rawdata['CellSize_m'],
+            'VbDepth_m':rawdata['VbDepth_m'],'Info':Info}
     return Data 
-
-def Hydro_process_auto(AutoData):
-    CorrectedAutoData = {}
-    EastVel = AutoData['HydroSurveyor_WaterVelocityXyz_Corrected_m_s'].iloc[:, 0::4]
-    NorthVel =
-
-
-    EastVel = EastVel.subtract(AutoData['BtVelEnu_m_s'].iloc[:, 0],axis=0)
-    NorthVel = WaterNorthVel.subtract(rawdata['HydroSurveyor_BtVelEnu_m_s'].iloc[:, 1],axis=0)
-    VertVel = WaterVertVel.subtract(rawdata['BtVelEnu_m_s'].iloc[:, 2],axis=0)
-    return(CorrectedAutoData)

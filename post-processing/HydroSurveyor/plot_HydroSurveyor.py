@@ -3,10 +3,13 @@ import matplotlib.pyplot as plt
 from read_HydroSurveyor import create_df
 import numpy as np
 from process_HydroSurveyor import dtnum_dttime
+import pandas as pd
 
 Data = Hydro_process(r"C:\Users\lwlav\OneDrive\Documents\Summer 2024 CHAZ\Data\Survey_ICW_20240520_raw.mat")
 
 AutoData, gg = create_df(r"C:\Users\lwlav\OneDrive\Documents\Summer 2024 CHAZ\Data\Survey_ICW_20240520.mat")
+
+MatVel,info = create_df(r"C:\Users\lwlav\OneDrive\Documents\Summer 2024 CHAZ\Data\HydroAnalysisExp.mat"); del info
 
 def raw_comparison_plot(Data):
     raw_velE = np.nanmean(Data['EastVel'],axis = 1)
@@ -63,8 +66,20 @@ def error_plots(AutoData, Data) :
     plt.legend()
     plt.show()
 
+def depth_velocity_plot(Data) :
+    #int_velE = np.nanmean(Data['EastVel_interp'],axis = 1)
+    #int_velN = np.nanmean(Data['NorthVel_interp'], axis = 1)
+    #int_velU = np.nanmean(Data['VertVel_interp'], axis =1)
 
-print(AutoData.keys())
+    plt.figure()
+    plt.pcolormesh(Data['DateTime'],Data['interpCellDepth'],Data['NorthVel_interp'].T, vmin=np.nanmin(Data['NorthVel_interp']),
+                   vmax=np.nanmax(Data['NorthVel_interp']),shading = 'auto',cmap = 'PiYG')
+    plt.plot(Data['DateTime'],Data['VbDepth_m'])
+    plt.colorbar()
+    plt.show()
+
+
+
 
 #raw_comparison_plot(Data)
 
@@ -73,4 +88,6 @@ print(AutoData.keys())
 #auto_manual_comparison(AutoData, Data)
 
 #error_plots(AutoData, Data)
+
+#depth_velocity_plot(Data)
 

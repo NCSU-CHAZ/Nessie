@@ -11,7 +11,7 @@ clear;clc;close all
 % need full path to the "exported" .mat file from
 % hydrosurveyor software (we need to modify this
 % workflow to use the "session" data instead).
- load('1_M9Hydro_ExpFile.mat') % --- Exported File
+ load("C:\Users\lwlav\OneDrive\Documents\Summer 2024 CHAZ\Data\Survey_ICW_20240520_raw.mat") % --- Exported File
 
 
 %% Edit DateTime Variable
