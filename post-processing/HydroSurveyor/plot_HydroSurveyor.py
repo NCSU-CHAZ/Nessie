@@ -6,7 +6,7 @@ from process_HydroSurveyor import dtnum_dttime
 
 Data = Hydro_process(r"C:\Users\lwlav\OneDrive\Documents\Summer 2024 CHAZ\Data\Survey_ICW_20240520_raw.mat")
 
-AutoData, gg = create_df(r"C:\Users\lwlav\OneDrive\Documents\Summer 2024 CHAZ\Data\Survey_ICW_20240520.mat"); del gg
+AutoData, gg = create_df(r"C:\Users\lwlav\OneDrive\Documents\Summer 2024 CHAZ\Data\Survey_ICW_20240520.mat")
 
 def raw_comparison_plot(Data):
     raw_velE = np.nanmean(Data['EastVel'],axis = 1)
@@ -64,13 +64,13 @@ def error_plots(AutoData, Data) :
     plt.show()
 
 
-#print(AutoData.keys())
+print(AutoData.keys())
 
 #raw_comparison_plot(Data)
 
 #interpolated_comparison_plot(Data)
 
-auto_manual_comparison(AutoData, Data)
+#auto_manual_comparison(AutoData, Data)
 
 #error_plots(AutoData, Data)
 

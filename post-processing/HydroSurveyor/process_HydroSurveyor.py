@@ -3,6 +3,7 @@ from scipy.interpolate import interp1d
 import pandas as pd
 import datetime as dt
 from read_HydroSurveyor import vector_df
+from read_HydroSurveyor import create_df
 from math import floor
 
 def nanhelp(y):
@@ -96,3 +97,13 @@ def Hydro_process(filepath) :
             'EastVel':EastVel, 'NorthVel':NorthVel, 'VertVel':VertVel,'CellGrid':CellGrid, 'BtErrVal':BtErrVal, 'DateTime':dates, 'Info':Info}
     return Data 
 
+def Hydro_process_auto(AutoData):
+    CorrectedAutoData = {}
+    EastVel = AutoData['HydroSurveyor_WaterVelocityXyz_Corrected_m_s'].iloc[:, 0::4]
+    NorthVel =
+
+
+    EastVel = EastVel.subtract(AutoData['BtVelEnu_m_s'].iloc[:, 0],axis=0)
+    NorthVel = WaterNorthVel.subtract(rawdata['HydroSurveyor_BtVelEnu_m_s'].iloc[:, 1],axis=0)
+    VertVel = WaterVertVel.subtract(rawdata['BtVelEnu_m_s'].iloc[:, 2],axis=0)
+    return(CorrectedAutoData)
