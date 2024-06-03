@@ -1,16 +1,16 @@
 clear all
 close all
 % Enter input /directory/ and fileName root without file extension
-inputDir  = '/Users/derekgrimes/OneDriveUNCW/DATA/CMS042524/'
-inputFile = 'CMS42504';
+inputDir  = 'C:\Users\lwlav\OneDrive\Documents\Summer 2024 CHAZ\Data\ADCP_05202024_unconverted';
+inputFile = 'CMS52002';
 fileName  = [inputDir,'/',inputFile];
 % Enter raw output /directory/ and fileName without .mat
-outputDir = '/Users/derekgrimes/Projects/survey_ski/mat_data/';
+outputDir = 'C:\Users\lwlav\OneDrive\Documents\Summer 2024 CHAZ\Data\ADCP_05202024_converted';
 outputName= [inputFile,'_raw'];
 % Enter processed output fileName without .mat
 L0Name  = [inputFile,'_L0'];
 % Enter path to save figures
-figDir = [inputDir,'/../figures/'];
+figDir = [inputDir];
 if ~exist(figDir,'dir'), eval(['!mkdir -p ',figDir]), end
 %
 % Enter time-offset (UTC->EDT) tos = -4 hours
@@ -155,47 +155,47 @@ np2 = 61;% 1 minute for 1Hz data
 f1 = hamming(np1);f1 = f1./sum(f1);
 f2 = hamming(np2);f2 = f2./sum(f2);
 A1 = conv2(f1,f2,A.a1','same');
-fig1 = figure;
-ax1 = subplot(3,1,1);
-imagesc(time,A.dbins',A1.*qcFlag0'),caxis([100 180]),colormap(cmocean('thermal')),colorbar
-text(time(1),nanmax(A.maxRange),'East')
-set(ax1,'ydir','normal','ticklabelinterpreter','latex','ylim',[0 nanmax(A.maxRange)])
-A2 = conv2(f1,f2,A.a2','same');
-ax2 = subplot(3,1,2);
-imagesc(time,A.dbins',A2.*qcFlag0'),caxis([100 180]),colormap(cmocean('thermal')),colorbar
-text(time(1),nanmax(A.maxRange),'North')
-ylabel('mab','interpreter','latex')
-set(ax2,'ydir','normal','ticklabelinterpreter','latex','ylim',[0 nanmax(A.maxRange)])
-A3 = conv2(f1,f2,A.a3','same');
-ax3 = subplot(3,1,3);
-imagesc(time,A.dbins',A3.*qcFlag0'),caxis([100 180]),colormap(cmocean('thermal')),colorbar
-text(time(1),nanmax(A.maxRange),'Up')
-set(ax3,'ydir','normal','ticklabelinterpreter','latex','ylim',[0 nanmax(A.maxRange)])
-xlabel('time [s]','interpreter','latex')
-figName = [figDir,'/',inputFile,'_amplitude.png'];
-exportgraphics(fig1,figName)
+% fig1 = figure;
+% ax1 = subplot(3,1,1);imaimag
+% imagesc(time,A.dbins',A1.*qcFlag0'),caxis([100 180]),colormap(cmocean('thermal')),colorbar
+% text(time(1),nanmax(A.maxRange),'East')
+% set(ax1,'ydir','normal','ticklabelinterpreter','latex','ylim',[0 nanmax(A.maxRange)])
+% A2 = conv2(f1,f2,A.a2','same');
+% ax2 = subplot(3,1,2);
+% imagesc(time,A.dbins',A2.*qcFlag0'),caxis([100 180]),colormap(cmocean('thermal')),colorbar
+% text(time(1),nanmax(A.maxRange),'North')
+% ylabel('mab','interpreter','latex')
+% set(ax2,'ydir','normal','ticklabelinterpreter','latex','ylim',[0 nanmax(A.maxRange)])
+% A3 = conv2(f1,f2,A.a3','same');
+% ax3 = subplot(3,1,3);
+% imagesc(time,A.dbins',A3.*qcFlag0'),caxis([100 180]),colormap(cmocean('thermal')),colorbar
+% text(time(1),nanmax(A.maxRange),'Up')
+% set(ax3,'ydir','normal','ticklabelinterpreter','latex','ylim',[0 nanmax(A.maxRange)])
+% xlabel('time [s]','interpreter','latex')
+% figName = [figDir,'/',inputFile,'_amplitude.png'];
+% exportgraphics(fig1,figName)
 %
 % plot currents
 V1 = conv2(f1,f2,A.v1','same');
-fig2 = figure;
-ax1 = subplot(3,1,1);
-imagesc(time,A.dbins',V1.*A.qcFlag'),caxis([-1 1]),colormap(cmocean('balance')),colorbar
-text(time(1),nanmax(A.maxRange),'East')
+% fig2 = figure;
+% ax1 = subplot(3,1,1);
+% imagesc(time,A.dbins',V1.*A.qcFlag'),caxis([-1 1]),colormap(cmocean('balance')),colorbar
+% text(time(1),nanmax(A.maxRange),'East')
 V2 = conv2(f1,f2,A.v2','same');
-set(ax1,'ydir','normal','ticklabelinterpreter','latex','ylim',[0 nanmax(A.maxRange)])
-ax2 = subplot(3,1,2);
-imagesc(time,A.dbins',V2.*A.qcFlag'),caxis([-0.5 0.5]),colormap(cmocean('balance')),colorbar
-text(time(1),nanmax(A.maxRange),'North')
-set(ax2,'ydir','normal','ticklabelinterpreter','latex','ylim',[0 nanmax(A.maxRange)])
-ylabel('mab','interpreter','latex')
+% set(ax1,'ydir','normal','ticklabelinterpreter','latex','ylim',[0 nanmax(A.maxRange)])
+% ax2 = subplot(3,1,2);
+% imagesc(time,A.dbins',V2.*A.qcFlag'),caxis([-0.5 0.5]),colormap(cmocean('balance')),colorbar
+% text(time(1),nanmax(A.maxRange),'North')
+% set(ax2,'ydir','normal','ticklabelinterpreter','latex','ylim',[0 nanmax(A.maxRange)])
+% ylabel('mab','interpreter','latex')
 V3 = conv2(f1,f2,A.v3','same');
-ax3 = subplot(3,1,3);
-imagesc(time,A.dbins',V3.*A.qcFlag'),caxis([-0.25 0.25]),colormap(cmocean('balance')),colorbar
-text(time(1),nanmax(A.maxRange),'Up')
-set(ax3,'ydir','normal','ticklabelinterpreter','latex','ylim',[0 nanmax(A.maxRange)])
-xlabel('time [s]','interpreter','latex')
-figName = [figDir,'/',inputFile,'_velocity.png'];
-exportgraphics(fig2,figName)
+% ax3 = subplot(3,1,3);
+% imagesc(time,A.dbins',V3.*A.qcFlag'),caxis([-0.25 0.25]),colormap(cmocean('balance')),colorbar
+% text(time(1),nanmax(A.maxRange),'Up')
+% set(ax3,'ydir','normal','ticklabelinterpreter','latex','ylim',[0 nanmax(A.maxRange)])
+% xlabel('time [s]','interpreter','latex')
+% figName = [figDir,'/',inputFile,'_velocity.png'];
+% exportgraphics(fig2,figName)
 %
 % get the time-averaged current.
 % Note, this is not in depth normalized (sigma) coordinates.
