@@ -9,7 +9,7 @@ Data = Hydro_process(r"C:\Users\lwlav\OneDrive\Documents\Summer 2024 CHAZ\Data\S
 
 AutoData, gg = create_df(r"C:\Users\lwlav\OneDrive\Documents\Summer 2024 CHAZ\Data\Survey_ICW_20240520.mat")
 
-AdcpData, gg = create_df(r"c:\Users\lwlav\OneDrive\Documents\Summer 2024 CHAZ\Data\CMS52002_L0.mat")
+AdcpData, gg = create_df(r"c:\Users\lwlav\OneDrive\Documents\Summer 2024 CHAZ\Data\CMS42504_L0.mat")
 
 #MatVel,info = create_df(r"C:\Users\lwlav\OneDrive\Documents\Summer 2024 CHAZ\Data\HydroAnalysisExp.mat"); del info
 
@@ -89,10 +89,12 @@ def depth_velocity_plot(Data) :
     plt.show()
 
 def adcp_comparison(AdcpData,Data) :
-    plt.figure()
-    plt.plot(np.nanmean(AdcpData['VelNorth'], axis =0))
-    plt.plot(np.nanmean(Data['NorthVel'], axis=0))
+    DT = dtnum_dttime(AdcpData['date'])
+    fig, axs = plt.subplots(2)
+    axs[0].plot(np.nanmean(AdcpData['VelNorth'], axis =0))
+    axs[1].plot(np.nanmean(Data['NorthVel_interp'], axis=1))
     plt.show()
+
 #raw_comparison_plot(Data)
 
 #interpolated_comparison_plot(Data)
@@ -101,6 +103,6 @@ def adcp_comparison(AdcpData,Data) :
 
 #error_plots(AutoData, Data)
 
-depth_velocity_plot(Data)
+#depth_velocity_plot(Data)
 
-#adcp_comparison(AdcpData,Data)
+adcp_comparison(AdcpData,Data)
