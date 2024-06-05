@@ -1,7 +1,7 @@
 clear all
 close all
 % Enter input /directory/ and fileName root without file extension
-inputDir  = '/Users/derekgrimes/OneDriveUNCW/DATA/CMS042524/'
+inputDir  = '/Users/derekgrimes/OneDriveUNCW/DATA/CMS042524/';
 inputFile = 'CMS42504';
 fileName  = [inputDir,'/',inputFile];
 % Enter raw output /directory/ and fileName without .mat
@@ -19,7 +19,7 @@ tos = -4;
 %% data for each field starts at column 39 or 40
 hdrFile = sprintf('%s/%s.hdr', inputDir,inputFile);
 fid = fopen(hdrFile);% open file
-while ~feof(fid);
+while ~feof(fid)
     %grab line
     line = fgetl(fid);
     %some skipped lines are very short
@@ -68,7 +68,7 @@ fclose(fid);
 senFile = sprintf('%s/%s.sen', inputDir,inputFile);
 fid = fopen(senFile,'r');
 A = textscan(fid,'%f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %*[^\n]');
-fclose(fid)
+fclose(fid);
 A1 = [A{:,1}, A{:,2}, A{:,3}, A{:,4}, A{:,5}, A{:,6}, A{:,7}, A{:,8}, A{:,9}, A{:,10}, A{:,11}, A{:,12} A{:,13}, A{:,14}, A{:,15} A{:,16} A{:,17}];
 date = datenum(A1(:,3),A1(:,1),A1(:,2),A1(:,4),A1(:,5),A1(:,6))+tos/24;
 volt = A1(:,11);

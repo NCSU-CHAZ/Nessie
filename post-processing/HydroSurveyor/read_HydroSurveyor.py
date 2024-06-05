@@ -8,7 +8,6 @@ def create_df(filepath) :
         del rawdata['__header__'] ; del rawdata['__version__'] ; del rawdata['__globals__']; #Delete unnecessary keys that list info about the function
         data = {} #Initialize data dictionary to place data into 
         Info = None #Initialize info as None
-        config = None
         for i in rawdata.keys() : #Run through loop where i is the key to the array in the dictionary
                 array = rawdata[i]  #Initialize a a duplicate array to allow for reshaping 
                 if rawdata[i].ndim == 3 :      #Flatten 3d arrays into 2d arrays, this causes an 3577x85x4 array to become 3577x340
@@ -20,7 +19,7 @@ def create_df(filepath) :
                         Info = array     
                 elif i == 'config':             #The info structure does not transfer well between MATLAB and Python but contains relevant data so we just 
                                                           #make a 1 to 1 copy
-                        config = array  
+                        Info = array  
                 else :                         #All 2d arrays get stored as a dataframe, this is the majority of data arrays in the structure
                         data[i] = pd.DataFrame(array)
         return data , Info

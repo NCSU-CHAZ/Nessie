@@ -3,7 +3,6 @@ from scipy.interpolate import interp1d
 import pandas as pd
 import datetime as dt
 from read_HydroSurveyor import vector_df
-from read_HydroSurveyor import create_df
 from math import floor
 
 def nanhelp(y):
@@ -19,6 +18,7 @@ def nanhelp(y):
 def dtnum_dttime(time_array) :
          dates = []
          DT = time_array.to_numpy()
+
          DT = DT/(1*10**6)/(86400) + 730486 #Convert fron hydrosurveyor time which is microseconds since Jan 01 2000 (or in datenum 730486)
          for ordinal in DT :
                  integer = floor(ordinal[0])
@@ -95,6 +95,6 @@ def Hydro_process(filepath) :
     dates = dtnum_dttime(rawdata['DateTime'])
 
     Data = {'EastVel_interp':EastVel_interp, 'NorthVel_interp':NorthVel_interp, 'VertVel_interp':VertVel_interp,'WaterErrVal':WaterErrVal, 'interpCellDepth':interpCellDepth, 
-            'EastVel':EastVel, 'NorthVel':NorthVel, 'VertVel':VertVel,'CellGrid':CellGrid, 'BtVel':BtVel, 'DateTime':dates, 'CellSize_m':rawdata['CellSize_m'],
+            'EastVel':EastVel, 'NorthVel':NorthVel, 'VertVel':VertVel,'CellGrid':CellGrid, 'BtVel':BtVel, 'DateNum':rawdata['DateTime'],'DateTime':dates, 'CellSize_m':rawdata['CellSize_m'],
             'VbDepth_m':rawdata['VbDepth_m'],'Info':Info}
     return Data 
