@@ -150,7 +150,4 @@ for jj in varCellSize:
 
 DateTime = dtnum_dttime(rawdata['DateTime'])
 
-plt.figure()
-plt.pcolormesh(DateTime,interpCellDepth,vel_interp.T, shading = 'nearest')
-plt.plot(DateTime,rawdata['VbDepth_m'])
-plt.show()
+print(rawdata.keys())

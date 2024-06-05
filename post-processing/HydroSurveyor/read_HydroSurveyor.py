@@ -14,9 +14,12 @@ def create_df(filepath) :
                         reshaped = array.reshape(array.shape[0],-1)   
                         data[i] = pd.DataFrame(reshaped)       #Save the data into the dictionary as a dataframe, dataframes are one of the many ways to 
                                                                #store data in python
-                elif i == 'Info':              #The info structure does not transfer well between MATLAB and Python but contains relevant data so we just 
-                                               #make a 1 to 1 copy
-                        Info = array      
+                elif i == 'Info' :             #The info structure does not transfer well between MATLAB and Python but contains relevant data so we just 
+                                                          #make a 1 to 1 copy
+                        Info = array     
+                elif i == 'config':             #The info structure does not transfer well between MATLAB and Python but contains relevant data so we just 
+                                                          #make a 1 to 1 copy
+                        Info = array  
                 else :                         #All 2d arrays get stored as a dataframe, this is the majority of data arrays in the structure
                         data[i] = pd.DataFrame(array)
         return data , Info

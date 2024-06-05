@@ -1,15 +1,16 @@
-from process_HydroSurveyor import Hydro_process
+from process_file_HydroSurveyor import Hydro_process, dtnum_dttime
 import matplotlib.pyplot as plt
 from read_HydroSurveyor import create_df
 import numpy as np
-from process_HydroSurveyor import dtnum_dttime
-import pandas as pd
+from process_session_HydroSurveyor import freq_interp
 
 Data = Hydro_process(r"C:\Users\lwlav\OneDrive\Documents\Summer 2024 CHAZ\Data\Survey_ICW_20240520_raw.mat")
 
-AutoData, gg = create_df(r"C:\Users\lwlav\OneDrive\Documents\Summer 2024 CHAZ\Data\Survey_ICW_20240520.mat")
+AdcpData, info = create_df(r"c:\Users\lwlav\OneDrive\Documents\Summer 2024 CHAZ\Data\CMS42504_L0.mat"); del info
 
-MatVel,info = create_df(r"C:\Users\lwlav\OneDrive\Documents\Summer 2024 CHAZ\Data\HydroAnalysisExp.mat"); del info
+AutoData, info = create_df(r"C:\Users\lwlav\OneDrive\Documents\Summer 2024 CHAZ\Data\Survey_ICW_20240520.mat"); del info
+
+#MatVel,info = create_df(r"C:\Users\lwlav\OneDrive\Documents\Summer 2024 CHAZ\Data\HydroAnalysisExp.mat"); del info
 
 def raw_comparison_plot(Data):
     raw_velE = np.nanmean(Data['EastVel'],axis = 1)
@@ -44,7 +45,6 @@ def interpolated_comparison_plot(Data):
 def auto_manual_comparison(AutoData, Data):
     auto_velN = np.nanmean(AutoData['HydroSurveyor_WaterVelocityXyz_Corrected_m_s'].iloc[:, 1::4], axis=0)
     int_velN = np.nanmean(Data['NorthVel_interp'], axis =1)
-    err = np.nanmean(AutoData['HydroSurveyor_AdpSnr_dB'])
     DT = dtnum_dttime(AutoData['HydroSurveyor_WaterVelocityXyz_Corrected_DateTime'])
     fig, axs = plt.subplots(2)
     axs[0].plot(Data['DateTime'], int_velN,color = 'green', label = 'CHAZ Processing')
@@ -67,19 +67,31 @@ def error_plots(AutoData, Data) :
     plt.show()
 
 def depth_velocity_plot(Data) :
-    #int_velE = np.nanmean(Data['EastVel_interp'],axis = 1)
-    #int_velN = np.nanmean(Data['NorthVel_interp'], axis = 1)
-    #int_velU = np.nanmean(Data['VertVel_interp'], axis =1)
+    fig, axs = plt.subplots(3)
+    
+    im1 = axs[0].pcolormesh(Data['DateTime'],Data['interpCellDepth'],Data['EastVel_interp'].T, vmin=np.nanmin(Data['EastVel_interp']),
+                   vmax=np.nanmax(Data['EastVel_interp']),shading = 'auto')
+    im2 = axs[1].pcolormesh(Data['DateTime'],Data['interpCellDepth'],Data['NorthVel_interp'].T, vmin=np.nanmin(Data['NorthVel_interp']),
+                   vmax=np.nanmax(Data['NorthVel_interp']),shading = 'auto')
+    im3 = axs[2].pcolormesh(Data['DateTime'],Data['interpCellDepth'],Data['VertVel_interp'].T, vmin=np.nanmin(Data['VertVel_interp']),
+                   vmax=np.nanmax(Data['VertVel_interp']),shading = 'auto')
+    axs[0].plot(Data['DateTime'],Data['VbDepth_m'])
+    axs[1].plot(Data['DateTime'],Data['VbDepth_m'])
+    axs[2].plot(Data['DateTime'],Data['VbDepth_m'])
 
-    plt.figure()
-    plt.pcolormesh(Data['DateTime'],Data['interpCellDepth'],Data['NorthVel_interp'].T, vmin=np.nanmin(Data['NorthVel_interp']),
-                   vmax=np.nanmax(Data['NorthVel_interp']),shading = 'auto',cmap = 'PiYG')
-    plt.plot(Data['DateTime'],Data['VbDepth_m'])
-    plt.colorbar()
+    axs[0].set_title('Easting Velocity'); axs[1].set_title('Northing Velocity'); axs[2].set_title('Vertical Velocity')
+    cb1 = fig.colorbar(im1,ax = axs[0]); cb2 = fig.colorbar(im2,ax = axs[1]); cb3 = fig.colorbar(im3,ax = axs[2])
+    cb1.ax.set_ylabel('Velocity (m/s)'); cb2.ax.set_ylabel('Velocity (m/s)'); cb3.ax.set_ylabel('Velocity (m/s)')
+    fig.tight_layout()
+    fig.supxlabel('DateTime (DD HH:MM)')
+    fig.supylabel('Depth (m)')
     plt.show()
 
-
-
+def adcp_comparison(AdcpData,Data) :
+    fig, axs = plt.subplots(2)
+    axs[0].plot(np.nanmean(AdcpData['VelNorth'], axis =0))
+    axs[1].plot(np.nanmean(Data['NorthVel_interp'], axis=1))
+    plt.show()
 
 #raw_comparison_plot(Data)
 
@@ -91,3 +103,17 @@ def depth_velocity_plot(Data) :
 
 #depth_velocity_plot(Data)
 
+#adcp_comparison(AdcpData,Data)
+
+interp_Bt_e = freq_interp(AutoData['HydroSurveyor_WaterVelocityXyz_Corrected_DateTime'],Data['BtVel'].iloc[:,0],Data['DateNum'])
+int_velE = np.nanmean(Data['EastVel_interp'],axis = 1)
+Corrected = AutoData['HydroSurveyor_WaterVelocityXyz_Corrected_m_s'].iloc[:,0::4].T - interp_Bt_e
+
+fig, axs = plt.subplots(2)
+axs[0].plot(AutoData['HydroSurveyor_WaterVelocityXyz_Corrected_DateTime'],np.nanmean(Corrected, axis = 1), label = 'Bt Corrected', color = 'Green')
+axs[0].plot(AutoData['HydroSurveyor_WaterVelocityXyz_Corrected_DateTime'],np.nanmean(AutoData['HydroSurveyor_WaterVelocityXyz_Corrected_m_s'].iloc[:,0::4].T, axis =1),label = 'Uncorrected', color = 'Pink')
+axs[0].plot(Data['DateNum'], int_velE, label = 'Easting')
+axs[1].plot(AutoData['HydroSurveyor_BottomTrack_DateTime'],AutoData['HydroSurveyor_BottomTrack_m_s'].iloc[:,0], label = 'Session Bt')
+axs[1].plot(Data['DateNum'],Data['BtVel'].iloc[:,0], label = 'Raw Bt')
+fig.legend()
+plt.show()
