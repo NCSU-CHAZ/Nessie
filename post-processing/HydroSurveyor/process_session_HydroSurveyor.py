@@ -53,6 +53,9 @@ def dtnum_dttime(time_array):
         dates.append(full)
     return dates
 
+def Hydro_session_qc(VelArray, CorrArray, Snr, FSample): 
+
+    return
 
 def Hydro_session_process(filepath):
     AutoData, Info = create_df(filepath)
@@ -73,20 +76,22 @@ def Hydro_session_process(filepath):
         AutoData["HydroSurveyor_BottomTrack_DateTime"],
     )
 
+    #Correct the velocites for bottomtrack motion
+
     XVel = (
         AutoData["HydroSurveyor_WaterVelocityXyz_Corrected_m_s"]
         .iloc[:, 0::4]
-        .T.subtract(BtInterpedE, axis=0)
+        .T
     )
     YVel = (
         AutoData["HydroSurveyor_WaterVelocityXyz_Corrected_m_s"]
         .iloc[:, 1::4]
-        .T.subtract(BtInterpedN, axis=0)
+        .T
     )
     ZVel = (
         AutoData["HydroSurveyor_WaterVelocityXyz_Corrected_m_s"]
         .iloc[:, 2::4]
-        .T.subtract(BtInterpedU, axis=0)
+        .T
     )
     BtVelXyz = AutoData["HydroSurveyor_BottomTrack_m_s"]
 
@@ -97,9 +102,14 @@ def Hydro_session_process(filepath):
     heading_rad = np.deg2rad(AutoData["HydroSurveyor_MagneticHeading_deg"] - 180)
     heading_rad = heading_rad.values.reshape(-1, 1)
 
-    EastVel = XVel * np.sin(heading_rad)
-    NorthVel = XVel * np.cos(heading_rad)
+    EastVel = XVel * np.sin(heading_rad) - YVel*np.cos(heading_rad)
+    NorthVel = XVel * np.cos(heading_rad) + YVel*np.sin(heading_rad)
     VertVel = ZVel
+
+    EastVel = EastVel.subtract(BtInterpedE, axis=0)
+    NorthVel = NorthVel.subtract(BtInterpedN, axis = 0)
+    VertVel = VertVel.subtract(BtInterpedU, axis = 0)
+
 
     dates = dtnum_dttime(AutoData["HydroSurveyor_WaterVelocityXyz_Corrected_DateTime"])
 

@@ -155,14 +155,14 @@ int_velE = np.nanmean(Data["EastVel_interp"], axis=1)
 
 fig, axs = plt.subplots(2)
 axs[0].plot(
-    np.nanmean(AutoData["EastVel"], axis=1), label="Bt Corrected", color="Green"
+    np.nanmean(AutoData["NorthVel"], axis=1), label="Bt Corrected", color="Green"
 )
 axs[0].plot(
     np.nanmean(AutoData["UncorrectedVel"].iloc[:, 0::4].T, axis=1),
     label="Uncorrected",
     color="Pink",
 )
-axs[0].plot(int_velE, label="Easting")
+axs[0].plot(int_velE, label="Raw Velocity")
 axs[1].plot(AutoData["BtVel"].iloc[:, 0], label="Session Bt")
 axs[1].plot(Data["BtVel"].iloc[:, 0], label="Raw Bt")
 fig.legend()
