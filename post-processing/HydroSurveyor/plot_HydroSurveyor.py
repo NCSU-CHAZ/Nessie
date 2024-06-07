@@ -137,6 +137,24 @@ def adcp_comparison(AdcpData, Data):
     plt.show()
 
 
+def Session_Comparison(AutoData, Data):
+    int_velE = np.nanmean(Data["EastVel_interp"], axis=1)
+    fig, axs = plt.subplots(2)
+    axs[0].plot(
+        np.nanmean(AutoData["NorthVel"], axis=1), label="Bt Corrected", color="Green"
+    )
+    axs[0].plot(
+        np.nanmean(AutoData["UncorrectedVel"].iloc[:, 0::4].T, axis=1),
+        label="Uncorrected",
+        color="Pink",
+    )
+    axs[0].plot(int_velE, label="Raw Velocity")
+    axs[1].plot(AutoData["BtVel"].iloc[:, 0], label="Session Bt")
+    axs[1].plot(Data["BtVel"].iloc[:, 0], label="Raw Bt")
+    fig.legend()
+    plt.show()
+
+
 # raw_comparison_plot(Data)
 
 # interpolated_comparison_plot(Data)
@@ -149,23 +167,6 @@ def adcp_comparison(AdcpData, Data):
 
 # adcp_comparison(AdcpData,Data)
 
-# interp_Bt_e = freq_interp(AutoData['HydroSurveyor_WaterVelocityXyz_Corrected_DateTime'],Data['BtVel'].iloc[:,0],Data['DateNum'])
-int_velE = np.nanmean(Data["EastVel_interp"], axis=1)
-# Corrected = AutoData['HydroSurveyor_WaterVelocityXyz_Corrected_m_s'].iloc[:,0::4].T - interp_Bt_e
+#Session_Comparison(AutoData,Data)
 
-fig, axs = plt.subplots(2)
-axs[0].plot(
-    np.nanmean(AutoData["NorthVel"], axis=1), label="Bt Corrected", color="Green"
-)
-axs[0].plot(
-    np.nanmean(AutoData["UncorrectedVel"].iloc[:, 0::4].T, axis=1),
-    label="Uncorrected",
-    color="Pink",
-)
-axs[0].plot(int_velE, label="Raw Velocity")
-axs[1].plot(AutoData["BtVel"].iloc[:, 0], label="Session Bt")
-axs[1].plot(Data["BtVel"].iloc[:, 0], label="Raw Bt")
-fig.legend()
-plt.show()
 
-# print(AutoData['HydroSurveyor_MagneticHeading_deg'],AutoData['Boat_Heading_deg'])
