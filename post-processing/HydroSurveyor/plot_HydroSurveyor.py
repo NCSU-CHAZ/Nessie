@@ -154,6 +154,11 @@ def Session_Comparison(AutoData, Data):
     fig.legend()
     plt.show()
 
+def Snr_plot(AutoData):
+     plt.figure()
+     plt.plot(AutoData['ADP_snr'][0][100])
+     print(AutoData['ADP_snr'][0][100])
+     plt.show()
 
 # raw_comparison_plot(Data)
 
@@ -169,4 +174,5 @@ def Session_Comparison(AutoData, Data):
 
 #Session_Comparison(AutoData,Data)
 
+Snr_plot(AutoData)
 

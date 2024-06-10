@@ -4,6 +4,7 @@ import pandas as pd
 import datetime as dt
 from read_HydroSurveyor import create_df
 from math import floor
+import matplotlib.pyplot as plt
 
 """ Important Keys in AutoData(There are more)
     ---'HydroSurveyor_WaterVelocityXyz_Corrected_m_s'
@@ -115,16 +116,19 @@ def Hydro_session_process(filepath):
     Beam3.reset_index(drop=True, inplace=True)
     Beam4 = AutoData['HydroSurveyor_AdpSnr_dB'].iloc[:, 3::4]
     Beam4.reset_index(drop=True, inplace=True)
-    Beams = [Beam1, Beam2,Beam3,Beam4]
+    Beams = [Beam1,Beam2,Beam3,Beam4]
 
-    Cutoffs = []
+    Cutoffs = {1:[] , 2:[], 3:[], 4:[]}
+    i = 0
     for WhichBeam in Beams :
+        i += 1
         for gg in np.arange(0,np.shape(WhichBeam)[1]) :
             Vals = WhichBeam.iloc[:,gg]   
             nanids, x = nanhelp(Vals)
-            floorid = np.argmax(Vals[~nanids])
-            Cutoffs.append(floorid)
+            floorid = np.argmax(np.diff(Vals[~nanids]))
+            Cutoffs[i].append(floorid)
     print(Cutoffs)
+    
 
     dates, DT = dtnum_dttime(
         AutoData["HydroSurveyor_WaterVelocityXyz_Corrected_DateTime"]
@@ -145,7 +149,7 @@ def Hydro_session_process(filepath):
         "XVel": XVel,
         "YVel": YVel,
         "ZVel": ZVel,
-        "ADP_snr": AutoData['HydroSurveyor_AdpSnr_dB'],
+        "ADP_snr": Beams,
         "VertBeam_snr":AutoData["HydroSurveyor_VerticalBeamSnr_dB"],
         "VertDepth":AutoData['HydroSurveyor_VerticalBeamRange_Corrected_m'],
         "UncorrectedVel": AutoData["HydroSurveyor_WaterVelocityXyz_Corrected_m_s"],
