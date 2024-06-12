@@ -1,15 +1,16 @@
-from process_file_HydroSurveyor import Hydro_process, dtnum_dttime
+from process_file_HydroSurveyor import Hydro_process, dtnum_dttime, dtnum_dttime_adcp
 import matplotlib.pyplot as plt
 from read_HydroSurveyor import create_df
 import numpy as np
 from process_session_HydroSurveyor import Hydro_session_process
+import datetime as dt
 
 Data = Hydro_process(
     r"C:\Users\lwlav\OneDrive\Documents\Summer 2024 CHAZ\Data\Survey_ICW_20240520_raw.mat"
 )
 
 AdcpData, info = create_df(
-    r"c:\Users\lwlav\OneDrive\Documents\Summer 2024 CHAZ\Data\CMS42504_L0.mat"
+    r"c:\Users\lwlav\OneDrive\Documents\Summer 2024 CHAZ\Data\CMS52002_L0.mat"
 )
 del info
 
@@ -130,10 +131,30 @@ def depth_velocity_plot(Data):
     plt.show()
 
 
-def adcp_comparison(AdcpData, Data):
-    fig, axs = plt.subplots(2)
-    axs[0].plot(np.nanmean(AdcpData["VelNorth"], axis=0))
-    axs[1].plot(np.nanmean(Data["NorthVel_interp"], axis=1))
+def adcp_comparison(AdcpData, Data, AutoData):
+    lw = 1
+    plt.figure()
+    plt.plot(
+        dtnum_dttime_adcp(AdcpData["date"]),
+        np.nanmean(AdcpData["VelNorth"], axis=0),
+        label="ADCP Data",
+    )
+    plt.plot(
+        Data["DateTime"],
+        np.nanmean(Data["NorthVel_interp"], axis=1),
+        color="Red",
+        label="File Data",
+        linewidth = lw,
+    )
+    plt.plot(
+        AutoData["DateTime"],
+        np.nanmean(AutoData["NorthVel"], axis=1),
+        label="Session Data",
+        color="Green",
+        linewidth = lw,
+    )
+    plt.xlim(AutoData["DateTime"][0], AutoData["DateTime"][-1])
+    plt.legend()
     plt.show()
 
 
@@ -149,16 +170,18 @@ def Session_Comparison(AutoData, Data):
         color="Pink",
     )
     axs[0].plot(int_velE, label="Raw Velocity")
-    axs[1].plot(AutoData["BtVel"].iloc[:, 0], label="Session Bt")
-    axs[1].plot(Data["BtVel"].iloc[:, 0], label="Raw Bt")
+    axs[1].plot(AutoData["BtVel"].iloc[:, 0], label="Session Bt", color="Red")
+    axs[1].plot(Data["BtVel"].iloc[:, 0], label="Raw Bt", color="Orange")
     fig.legend()
     plt.show()
 
+
 def Snr_plot(AutoData):
-     plt.figure()
-     plt.plot(AutoData['ADP_snr'][0][100])
-     print(AutoData['ADP_snr'][0][100])
-     plt.show()
+    plt.figure()
+    plt.plot(AutoData["ADP_snr"][0][100])
+    print(AutoData["ADP_snr"][0][100])
+    plt.show()
+
 
 # raw_comparison_plot(Data)
 
@@ -170,9 +193,8 @@ def Snr_plot(AutoData):
 
 # depth_velocity_plot(Data)
 
-# adcp_comparison(AdcpData,Data)
+adcp_comparison(AdcpData, Data, AutoData)
 
-#Session_Comparison(AutoData,Data)
+# Session_Comparison(AutoData,Data)
 
-Snr_plot(AutoData)
-
+# Snr_plot(AutoData)

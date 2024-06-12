@@ -29,8 +29,9 @@ def dtnum_dttime(time_array):
         frac = ordinal - integer
         date = dt.datetime.fromordinal(integer)
         time = dt.timedelta(days=frac[0])
+        tos = dt.timedelta(hours=4)
         mat_correction = dt.timedelta(days=366)
-        full = date + time - mat_correction
+        full = date + time - mat_correction - tos
         dates.append(full)
     return dates
 
@@ -141,3 +142,16 @@ def Hydro_process(filepath):
         "Info": Info,
     }
     return Data
+
+def dtnum_dttime_adcp(time_array):
+    dates = []
+    DT = time_array.to_numpy()
+    for ordinal in DT:
+        integer = floor(ordinal[0])
+        frac = ordinal - integer
+        date = dt.datetime.fromordinal(integer)
+        time = dt.timedelta(days=frac[0])
+        mat_correction = dt.timedelta(days=366)
+        full = date + time - mat_correction
+        dates.append(full)
+    return dates

@@ -54,16 +54,17 @@ def dtnum_dttime(time_array):
         frac = ordinal - integer
         date = dt.datetime.fromordinal(integer)
         time = dt.timedelta(days=frac[0])
+        tos = dt.timedelta(hours=4)
         mat_correction = dt.timedelta(days=366)
-        full = date + time - mat_correction
+        full = date + time - mat_correction - tos
         dates.append(full)
     return dates, DT
 
 
-def Hydro_session_qc(VelArray, Snr, Fs, SnrThresh):
-    # CorrThresh = .3 +.4*((Fs/25)**.5) #Minimum correlation threshold used in Elgar 2001
-    Snr
-    return
+def Hydro_session_qc(VelArray, Snr, SnrThresh):
+    isbad = (Snr <= SnrThresh)
+    VelArray[isbad] = np.nan
+    return VelArray
 
 def Hydro_session_process(filepath):
     AutoData, Info = create_df(filepath)
@@ -83,31 +84,16 @@ def Hydro_session_process(filepath):
         AutoData["HydroSurveyor_BottomTrack_m_s"].iloc[:, 2],
         AutoData["HydroSurveyor_BottomTrack_DateTime"],
     )
-
-    # Correct the velocites for bottomtrack motion
-
+    #Acquire each velocity array from the larger array and transpose them to align with other arrays
     XVel = AutoData["HydroSurveyor_WaterVelocityXyz_Corrected_m_s"].iloc[:, 0::4].T
     YVel = AutoData["HydroSurveyor_WaterVelocityXyz_Corrected_m_s"].iloc[:, 1::4].T
     ZVel = AutoData["HydroSurveyor_WaterVelocityXyz_Corrected_m_s"].iloc[:, 2::4].T
     BtVelXyz = AutoData["HydroSurveyor_BottomTrack_m_s"]
-
+    #Reset their indexes from [0, 4 ,8, 12] to [0,1,2,3]
     XVel.reset_index(drop=True, inplace=True)
     YVel.reset_index(drop=True, inplace=True)
     ZVel.reset_index(drop=True, inplace=True)
-
-    heading_rad = np.deg2rad(AutoData["HydroSurveyor_MagneticHeading_deg"] - 180)
-    heading_rad = heading_rad.values.reshape(-1, 1)
-
-    EastVel = XVel * np.sin(heading_rad) - YVel * np.cos(heading_rad)
-    NorthVel = XVel * np.cos(heading_rad) + YVel * np.sin(heading_rad)
-    VertVel = ZVel
-
-    EastVel = EastVel.subtract(BtInterpedE, axis=0)
-    NorthVel = NorthVel.subtract(BtInterpedN, axis=0)
-    VertVel = VertVel.subtract(BtInterpedU, axis=0)
-
-    #Create Mask that cuts off all measurements below the ocean floor
-    #This is done by taking the spike in SnR that occurs when the signal gets to the floor
+    #Aqcuire the individual beam SnR
     Beam1 = AutoData['HydroSurveyor_AdpSnr_dB'].iloc[:, 0::4]
     Beam1.reset_index(drop=True, inplace=True)
     Beam2 = AutoData['HydroSurveyor_AdpSnr_dB'].iloc[:, 1::4]
@@ -116,9 +102,28 @@ def Hydro_session_process(filepath):
     Beam3.reset_index(drop=True, inplace=True)
     Beam4 = AutoData['HydroSurveyor_AdpSnr_dB'].iloc[:, 3::4]
     Beam4.reset_index(drop=True, inplace=True)
+
+    #QC the velocities based on the signal to noise ratio
+    XVel = Hydro_session_qc(XVel,Beam1,16)
+    YVel = Hydro_session_qc(YVel,Beam2,16)
+    ZVel = Hydro_session_qc(ZVel,Beam3,16)
+
+    #Acquire Vessel HEading and switch from degrres to radians
+    heading_rad = np.deg2rad(AutoData["HydroSurveyor_MagneticHeading_deg"] - 180)
+    heading_rad = heading_rad.values.reshape(-1, 1)
+
+    #Change from XYZ to ENUD 
+    EastVel = XVel * np.sin(heading_rad) - YVel * np.cos(heading_rad)
+    NorthVel = XVel * np.cos(heading_rad) + YVel * np.sin(heading_rad)
+    VertVel = ZVel
+    # Correct the velocites for bottomtrack motion
+    EastVel = EastVel.subtract(BtInterpedE, axis=0)
+    NorthVel = NorthVel.subtract(BtInterpedN, axis=0)
+    VertVel = VertVel.subtract(BtInterpedU, axis=0)
+
     Beams = [Beam1,Beam2,Beam3,Beam4]
 
-    Cutoffs = {1:[] , 2:[], 3:[], 4:[]}
+    #Use the beam signal to noise rations to find which cell detects the bottom and nan everything below 
     i = 0
     for WhichBeam in Beams :
         i += 1
@@ -126,9 +131,13 @@ def Hydro_session_process(filepath):
             Vals = WhichBeam.iloc[:,gg]   
             nanids, x = nanhelp(Vals)
             floorid = np.argmax(np.diff(Vals[~nanids]))
-            Cutoffs[i].append(floorid)
-    print(Cutoffs)
-    
+            if i == 1 :
+                EastVel.iloc[gg,floorid:]= np.nan
+            if i == 2 :
+                NorthVel.iloc[gg,floorid:]= np.nan
+            if i == 3 :
+                VertVel.iloc[gg,floorid:]= np.nan
+
 
     dates, DT = dtnum_dttime(
         AutoData["HydroSurveyor_WaterVelocityXyz_Corrected_DateTime"]
