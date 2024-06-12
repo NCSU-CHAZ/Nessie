@@ -117,10 +117,11 @@ def Hydro_session_process(filepath):
     EastVel = XVel * np.sin(heading_rad) - YVel * np.cos(heading_rad)
     NorthVel = XVel * np.cos(heading_rad) + YVel * np.sin(heading_rad)
     VertVel = ZVel
+
     # Correct the velocites for bottomtrack motion
-    EastVel = EastVel.subtract(BtInterpedE, axis=0)
-    NorthVel = NorthVel.subtract(BtInterpedN, axis=0)
-    VertVel = VertVel.subtract(BtInterpedU, axis=0)
+    # EastVel = EastVel.subtract(BtInterpedE, axis=0)
+    # NorthVel = NorthVel.subtract(BtInterpedN, axis=0)
+    # VertVel = VertVel.subtract(BtInterpedU, axis=0)
 
     Beams = [Beam1, Beam2, Beam3, Beam4]
 
