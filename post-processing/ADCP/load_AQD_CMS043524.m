@@ -1,16 +1,16 @@
 clear all
 close all
 % Enter input /directory/ and fileName root without file extension
-inputDir  = '/Users/derekgrimes/OneDriveUNCW/DATA/CMS042524/';
-inputFile = 'CMS42504';
+inputDir  = 'C:\Users\lwlav\OneDrive\Documents\Summer 2024 CHAZ\Data\ADCP_05202024_unconverted';
+inputFile = 'CMS52002';
 fileName  = [inputDir,'/',inputFile];
 % Enter raw output /directory/ and fileName without .mat
-outputDir = '/Users/derekgrimes/Projects/survey_ski/mat_data/';
+outputDir = 'C:\Users\lwlav\OneDrive\Documents\Summer 2024 CHAZ\Data';
 outputName= [inputFile,'_raw'];
 % Enter processed output fileName without .mat
 L0Name  = [inputFile,'_L0'];
 % Enter path to save figures
-figDir = [inputDir,'/../figures/'];
+figDir = [inputDir];
 if ~exist(figDir,'dir'), eval(['!mkdir -p ',figDir]), end
 %
 % Enter time-offset (UTC->EDT) tos = -4 hours
@@ -157,20 +157,20 @@ f2 = hamming(np2);f2 = f2./sum(f2);
 A1 = conv2(f1,f2,A.a1','same');
 fig1 = figure;
 ax1 = subplot(3,1,1);
-imagesc(time,A.dbins',A1.*qcFlag0'),caxis([100 180]),colormap(cmocean('thermal')),colorbar
-text(time(1),nanmax(A.maxRange),'East')
-set(ax1,'ydir','normal','ticklabelinterpreter','latex','ylim',[0 nanmax(A.maxRange)])
+imagesc(time,A.dbins',A1.*qcFlag0'),caxis([100 180]),colorbar
+text(time(1),max(A.maxRange,[],"omitnan"),'East')
+set(ax1,'ydir','normal','ticklabelinterpreter','latex','ylim',[0 max(A.maxRange,[],"omitnan")])
 A2 = conv2(f1,f2,A.a2','same');
 ax2 = subplot(3,1,2);
-imagesc(time,A.dbins',A2.*qcFlag0'),caxis([100 180]),colormap(cmocean('thermal')),colorbar
-text(time(1),nanmax(A.maxRange),'North')
+imagesc(time,A.dbins',A2.*qcFlag0'),caxis([100 180]),colorbar
+text(time(1),max(A.maxRange,[],"omitnan"),'North')
 ylabel('mab','interpreter','latex')
-set(ax2,'ydir','normal','ticklabelinterpreter','latex','ylim',[0 nanmax(A.maxRange)])
+set(ax2,'ydir','normal','ticklabelinterpreter','latex','ylim',[0 max(A.maxRange,[],"omitnan")])
 A3 = conv2(f1,f2,A.a3','same');
 ax3 = subplot(3,1,3);
-imagesc(time,A.dbins',A3.*qcFlag0'),caxis([100 180]),colormap(cmocean('thermal')),colorbar
-text(time(1),nanmax(A.maxRange),'Up')
-set(ax3,'ydir','normal','ticklabelinterpreter','latex','ylim',[0 nanmax(A.maxRange)])
+imagesc(time,A.dbins',A3.*qcFlag0'),caxis([100 180]),colorbar
+text(time(1),max(A.maxRange,[],"omitnan"),'Up')
+set(ax3,'ydir','normal','ticklabelinterpreter','latex','ylim',[0 max(A.maxRange,[],"omitnan")])
 xlabel('time [s]','interpreter','latex')
 figName = [figDir,'/',inputFile,'_amplitude.png'];
 exportgraphics(fig1,figName)
@@ -179,20 +179,20 @@ exportgraphics(fig1,figName)
 V1 = conv2(f1,f2,A.v1','same');
 fig2 = figure;
 ax1 = subplot(3,1,1);
-imagesc(time,A.dbins',V1.*A.qcFlag'),caxis([-1 1]),colormap(cmocean('balance')),colorbar
-text(time(1),nanmax(A.maxRange),'East')
+imagesc(time,A.dbins',V1.*A.qcFlag'),caxis([-1 1]),colorbar
+text(time(1),max(A.maxRange,[],"omitnan"),'East')
 V2 = conv2(f1,f2,A.v2','same');
-set(ax1,'ydir','normal','ticklabelinterpreter','latex','ylim',[0 nanmax(A.maxRange)])
+set(ax1,'ydir','normal','ticklabelinterpreter','latex','ylim',[0 max(A.maxRange,[],"omitnan")])
 ax2 = subplot(3,1,2);
-imagesc(time,A.dbins',V2.*A.qcFlag'),caxis([-0.5 0.5]),colormap(cmocean('balance')),colorbar
-text(time(1),nanmax(A.maxRange),'North')
-set(ax2,'ydir','normal','ticklabelinterpreter','latex','ylim',[0 nanmax(A.maxRange)])
+imagesc(time,A.dbins',V2.*A.qcFlag'),caxis([-0.5 0.5]),colorbar
+text(time(1),max(A.maxRange,[],"omitnan"),'North')
+set(ax2,'ydir','normal','ticklabelinterpreter','latex','ylim',[0 max(A.maxRange,[],"omitnan")])
 ylabel('mab','interpreter','latex')
 V3 = conv2(f1,f2,A.v3','same');
 ax3 = subplot(3,1,3);
-imagesc(time,A.dbins',V3.*A.qcFlag'),caxis([-0.25 0.25]),colormap(cmocean('balance')),colorbar
-text(time(1),nanmax(A.maxRange),'Up')
-set(ax3,'ydir','normal','ticklabelinterpreter','latex','ylim',[0 nanmax(A.maxRange)])
+imagesc(time,A.dbins',V3.*A.qcFlag'),caxis([-0.25 0.25]),colorbar
+text(time(1),max(A.maxRange,[],"omitnan"),'Up')
+set(ax3,'ydir','normal','ticklabelinterpreter','latex','ylim',[0 max(A.maxRange,[],"omitnan")])
 xlabel('time [s]','interpreter','latex')
 figName = [figDir,'/',inputFile,'_velocity.png'];
 exportgraphics(fig2,figName)
@@ -205,9 +205,9 @@ V2(~A.qcFlag')=nan;
 V3(~A.qcFlag')=nan;
 flag = sum(A.qcFlag,1) > 0.70*nsamples;
 % Uz = time averegd; U = depth & time averaged
-Uz = nanmean(V1,2); U = nanmean(Uz); Uz(~flag)=nan;
-Vz = nanmean(V2,2); V = nanmean(Vz); Vz(~flag)=nan;
-Wz = nanmean(V3,2); W = nanmean(Wz); Wz(~flag)=nan;
+Uz = mean(V1,2,"omitnan"); U = mean(Uz,"omitnan"); Uz(~flag)=nan;
+Vz = mean(V2,2,"omitnan"); V = mean(Vz,"omitnan"); Vz(~flag)=nan;
+Wz = mean(V3,2,"omitnan"); W = mean(Wz,"omitnan"); Wz(~flag)=nan;
 %
 fig3 = figure;
 plot(Uz,A.dbins,'.-r',Vz,A.dbins,'.-b',Wz,A.dbins,'.-k')
