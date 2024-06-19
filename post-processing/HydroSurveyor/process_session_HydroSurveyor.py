@@ -70,17 +70,17 @@ def Hydro_session_qc(VelArray, Snr, SnrThresh):
 def Hydro_session_process(filepath):
     AutoData, Info = create_df(filepath)
 
-    BtInterpedE = freq_interp(
+    BtInterpedX = freq_interp(
         AutoData["HydroSurveyor_WaterVelocityXyz_Corrected_DateTime"],
         AutoData["HydroSurveyor_BottomTrack_m_s"].iloc[:, 0],
         AutoData["HydroSurveyor_BottomTrack_DateTime"],
     )
-    BtInterpedN = freq_interp(
+    BtInterpedY = freq_interp(
         AutoData["HydroSurveyor_WaterVelocityXyz_Corrected_DateTime"],
         AutoData["HydroSurveyor_BottomTrack_m_s"].iloc[:, 1],
         AutoData["HydroSurveyor_BottomTrack_DateTime"],
     )
-    BtInterpedU = freq_interp(
+    BtInterpedZ = freq_interp(
         AutoData["HydroSurveyor_WaterVelocityXyz_Corrected_DateTime"],
         AutoData["HydroSurveyor_BottomTrack_m_s"].iloc[:, 2],
         AutoData["HydroSurveyor_BottomTrack_DateTime"],
@@ -89,7 +89,7 @@ def Hydro_session_process(filepath):
     XVel = AutoData["HydroSurveyor_WaterVelocityXyz_Corrected_m_s"].iloc[:, 0::4].T
     YVel = AutoData["HydroSurveyor_WaterVelocityXyz_Corrected_m_s"].iloc[:, 1::4].T
     ZVel = AutoData["HydroSurveyor_WaterVelocityXyz_Corrected_m_s"].iloc[:, 2::4].T
-    BtVelXyz = AutoData["HydroSurveyor_BottomTrack_m_s"]
+
     # Reset their indexes from [0, 4 ,8, 12] to [0,1,2,3]
     XVel.reset_index(drop=True, inplace=True)
     YVel.reset_index(drop=True, inplace=True)
@@ -110,18 +110,13 @@ def Hydro_session_process(filepath):
     ZVel = Hydro_session_qc(ZVel, Beam3, 16)
 
     # Acquire Vessel HEading and switch from degrres to radians
-    heading_rad = np.deg2rad(AutoData["HydroSurveyor_MagneticHeading_deg"] - 180)
+    heading_rad = np.deg2rad(AutoData["HydroSurveyor_MagneticHeading_deg"])
     heading_rad = heading_rad.values.reshape(-1, 1)
 
     # Change from XYZ to ENUD
     EastVel = XVel * np.sin(heading_rad) - YVel * np.cos(heading_rad)
     NorthVel = XVel * np.cos(heading_rad) + YVel * np.sin(heading_rad)
     VertVel = ZVel
-
-    # Correct the velocites for bottomtrack motion
-    # EastVel = EastVel.subtract(BtInterpedE, axis=0)
-    # NorthVel = NorthVel.subtract(BtInterpedN, axis=0)
-    # VertVel = VertVel.subtract(BtInterpedU, axis=0)
 
     Beams = [Beam1, Beam2, Beam3, Beam4]
 
@@ -152,7 +147,9 @@ def Hydro_session_process(filepath):
         "EastVel": EastVel,
         "NorthVel": NorthVel,
         "VertVel": VertVel,
-        "BtVel": BtVelXyz,
+        "BtVelX": BtInterpedX,
+        "BtVelZ": BtInterpedZ,
+        "BtVelY": BtInterpedY,
         "DateNum": AutoData["HydroSurveyor_WaterVelocityXyz_Corrected_DateTime"],
         "DateTime": dates,
         "Info": Info,
@@ -163,5 +160,8 @@ def Hydro_session_process(filepath):
         "VertBeam_snr": AutoData["HydroSurveyor_VerticalBeamSnr_dB"],
         "VertDepth": AutoData["HydroSurveyor_VerticalBeamRange_Corrected_m"],
         "UncorrectedVel": AutoData["HydroSurveyor_WaterVelocityXyz_Corrected_m_s"],
+        "HydroSurveyor_MagneticHeading_deg": AutoData[
+            "HydroSurveyor_MagneticHeading_deg"
+        ],
     }
     return Data
