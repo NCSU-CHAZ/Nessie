@@ -20,7 +20,6 @@ def nanhelp(y):
 def dtnum_dttime(time_array):
     dates = []
     DT = time_array.to_numpy()
-
     DT = (
         DT / (1 * 10**6) / (86400) + 730486
     )  # Convert fron hydrosurveyor time which is microseconds since Jan 01 2000 (or in datenum 730486)
@@ -142,17 +141,3 @@ def Hydro_process(filepath):
         "Info": Info,
     }
     return Data
-
-
-def dtnum_dttime_adcp(time_array):
-    dates = []
-    DT = time_array.to_numpy()
-    for ordinal in DT:
-        integer = floor(ordinal[0])
-        frac = ordinal - integer
-        date = dt.datetime.fromordinal(integer)
-        time = dt.timedelta(days=frac[0])
-        mat_correction = dt.timedelta(days=366)
-        full = date + time - mat_correction
-        dates.append(full)
-    return dates

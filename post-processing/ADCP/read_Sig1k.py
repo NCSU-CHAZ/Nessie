@@ -57,4 +57,3 @@ def read_Sig1k(filepath):  # Create read function
         ADCPData[str(keys[i])] = pd.DataFrame(Data["Data"][0, 0][i]) #Iterate through the nested numpy arrays turning each 
                                                                      #individual array into a dataframe and saving it to it's key
     return ADCPData
-
