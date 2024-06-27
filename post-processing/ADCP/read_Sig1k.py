@@ -1,6 +1,7 @@
 from scipy.io import loadmat
 import pandas as pd
 import numpy as np
+from math import floor
 
 # This code generates a dicionary containing all of the quantitative data exported by the Nortek Signature Deployment,
 
@@ -36,7 +37,9 @@ import numpy as np
 'Echo1Bin1_1000kHz_Roll', 'Echo1Bin1_1000kHz_Temperature', 'Echo1Bin1_1000kHz_Soundspeed', 'Echo1Bin1_1000kHz_Pressure', 
 'Echo1Bin1_1000kHz_PressureSensorTemperature', 'Echo1Bin1_1000kHz_RTCTemperature', 'Echo1Bin1_1000kHz_MagnetometerTemperature', 
 'Echo1Bin1_1000kHz_TransmitEnergy', 'Echo1Bin1_1000kHz_Magnetometer', 'Echo1Bin1_1000kHz_Accelerometer', 
-'Echo1Bin1_1000kHz_NominalCorrelation', 'Echo2Bin1_1000kHz_Time', 'Echo2Bin1_1000kHz_Status', 'Echo2Bin1_1000kHz_ExtStatus', 
+'Echo1Bin1_1000kHz_NominalCorrelation', 
+
+'Echo2Bin1_1000kHz_Time', 'Echo2Bin1_1000kHz_Status', 'Echo2Bin1_1000kHz_ExtStatus', 
 'Echo2Bin1_1000kHz_Error', 'Echo2Bin1_1000kHz_EnsembleCount', 'Echo2Bin1_1000kHz_NBeams', 'Echo2Bin1_1000kHz_NCells', 
 'Echo2Bin1_1000kHz_BeamToChannelMapping', 'Echo2Bin1_1000kHz_Frequency', 'Echo2Bin1_1000kHz_Echo', 'Echo2Bin1_1000kHz_Battery', 
 'Echo2Bin1_1000kHz_Heading', 'Echo2Bin1_1000kHz_Pitch', 'Echo2Bin1_1000kHz_Roll', 'Echo2Bin1_1000kHz_Temperature',
@@ -49,11 +52,26 @@ def read_Sig1k(filepath):  # Create read function
     Data = loadmat(
         filepath
     )  # Load mat oragnizes the 4 different data structures of the .mat file (Units, Config, Data, Description) as a
-       #dictionary with four nested numpy arrays with dtypes as data field titles 
-    ADCPData = {} #Initialize the dictionary we'll use
-    DTypes = Data["Data"][0, 0].dtype #Acquire the dtypes for the data field keys
-    keys = DTypes.names #Initialize the keys
+    # dictionary with four nested numpy arrays with dtypes as data field titles
+    ADCPData = {}  # Initialize the dictionary we'll use
+    DTypes = Data["Data"][0, 0].dtype  # Acquire the dtypes for the data field keys
+    keys = DTypes.names  # Initialize the keys
     for i in range(0, len(Data["Data"][0, 0])):
-        ADCPData[str(keys[i])] = pd.DataFrame(Data["Data"][0, 0][i]) #Iterate through the nested numpy arrays turning each 
-                                                                     #individual array into a dataframe and saving it to it's key
-    return ADCPData
+        ADCPData[str(keys[i])] = pd.DataFrame(
+            Data["Data"][0, 0][i]
+        )  # Iterate through the nested numpy arrays turning each
+        # individual array into a dataframe and saving it to it's key
+
+    T_matrix = Data["Config"][0, 0].dtype['Burst_Beam2xyz']
+    return ADCPData, T_matrix
+
+
+# def combine_Sig1k(filepath): # When the software exports data as a .mat file, if the file size is too large it seperates them into
+#                              # individual columns
+#     Data = read_Sig1k(filepath)
+#     N= floor(len(Data['IBurst_EnsembleCount'])/95)
+#     print(Data['IBurst_EnsembleCount'])
+#     for i in range(1,N+1):
+#         whichnum = str(i)
+#         key = f'BurstVelBeam{whichnum}'
+#         return Data

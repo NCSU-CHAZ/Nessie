@@ -1,28 +1,22 @@
-from process_file_HydroSurveyor import Hydro_process, dtnum_dttime, dtnum_dttime_adcp
+from process_file_HydroSurveyor import Hydro_process
 import matplotlib.pyplot as plt
-from read_HydroSurveyor import create_df
 import numpy as np
 from process_session_HydroSurveyor import Hydro_session_process
 import datetime as dt
 import pandas as pd
 from scipy.signal import medfilt
-
+from ADCP.process_Sig1k import dtnum_dttime_adcp, process
 
 Data = Hydro_process(
-    r"C:\Users\lwlav\OneDrive\Documents\Summer 2024 CHAZ\Data\Survey_ICW_20240520_raw.mat"
+    r"C:\Users\lwlav\OneDrive\Documents\Summer 2024 CHAZ\Data\file_data.mat"
 )
-
-AdcpData, info = create_df(
-    r"c:\Users\lwlav\OneDrive\Documents\Summer 2024 CHAZ\Data\CMS52002_L0.mat"
-)
-del info
 
 AutoData = Hydro_session_process(
-    r"C:\Users\lwlav\OneDrive\Documents\Summer 2024 CHAZ\Data\Survey_ICW_20240520.mat"
+    r"C:\Users\lwlav\OneDrive\Documents\Summer 2024 CHAZ\Data\session_data.mat"
 )
 
 LayerData = pd.read_csv(
-    r"C:\Users\lwlav\OneDrive\Documents\Summer 2024 CHAZ\Data\Velocity_Vectors.csv",
+    r"C:\Users\lwlav\OneDrive\Documents\Summer 2024 CHAZ\Data\vel_vectors.csv",
     header=0,
 )
 DateTime = pd.to_datetime(LayerData["utc_time"], format="%Y-%m-%d %H:%M:%S.%f")
@@ -126,36 +120,6 @@ def depth_velocity_plot(Data):
     plt.show()
 
 
-def adcp_comparison(AdcpData, Data, AutoData, LayerData):
-    lw = 1
-    plt.figure()
-    plt.plot(
-        dtnum_dttime_adcp(AdcpData["date"]),
-        np.nanmean(AdcpData["VelNorth"], axis=0),
-        label="ADCP Data",
-    )
-    plt.plot(
-        Data["DateTime"],
-        medfilt(np.nanmean(Data["NorthVel_interp"], axis=1)),
-        color="Red",
-        label="File Data",
-        linewidth=lw,
-    )
-    plt.plot(
-        AutoData["DateTime"],
-        medfilt(np.nanmean(AutoData["NorthVel"], axis=1)),
-        label="Session Data",
-        color="Green",
-        linewidth=lw,
-    )
-    plt.plot(DateTime, medfilt(LayerData["average_N"]), label="Layer", linewidth=lw)
-    plt.xlim(AutoData["DateTime"][0], AutoData["DateTime"][-1])
-    plt.title("Northing Velocities vs Time")
-    plt.xlabel("Time (DD HH:MM)")
-    plt.ylabel("Velocity (m/s)")
-    plt.legend()
-    plt.show()
-
 
 def Snr_plot(AutoData):
     plt.figure()
@@ -181,16 +145,16 @@ def ADCP_Data(AdcpData):
     plt.show()
 
 
-# raw_comparison_plot(Data)
+raw_comparison_plot(Data)
 
-# BT_comparison_plot(Data)
+BT_comparison_plot(Data)
 
-# auto_manual_comparison(AutoData, Data)
+auto_manual_comparison(AutoData, Data)
 
-# depth_velocity_plot(Data)
+depth_velocity_plot(Data)
 
-# adcp_comparison(AdcpData, Data, AutoData, LayerData)
+adcp_comparison(AdcpData, Data, AutoData, LayerData)
 
-# Snr_plot(AutoData)
+Snr_plot(AutoData)
 
 #ADCP_Data(AdcpData)

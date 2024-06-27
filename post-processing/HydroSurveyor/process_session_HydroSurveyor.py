@@ -7,15 +7,15 @@ from math import floor
 import matplotlib.pyplot as plt
 
 """ Important Keys in AutoData(There are more)
-    ---'HydroSurveyor_WaterVelocityXyz_Corrected_m_s'
-    ---'HydroSurveyor_WaterVelocityXyz_Corrected_DateTime'
+    ---'HydroSurveyor_WaterVelocityXyz_m_s'
+    ---'HydroSurveyor_WaterVelocityXyz_DateTime'
     ---'HydroSurveyor_BottomTrack_m_s'
     ---'HydroSurveyor_BottomTrack_DateTime'
-    ---'HydroSurveyor_VerticalBeamRange_Corrected_m'
+    ---'HydroSurveyor_VerticalBeamRange_m'
     ---'HydroSurveyor_VerticalBeamSnr_dB'
     ---'HydroSurveyor_MagneticHeading_deg'
     ---'Boat_Heading_deg'
-    ---'HydroSurveyor_WaterSpeed_Corrected_m_s'
+    ---'HydroSurveyor_WaterSpeed_m_s'
     ---'HydroSurveyor_WaterDirection_Corrected'
 """
 
@@ -69,26 +69,26 @@ def Hydro_session_qc(VelArray, Snr, SnrThresh):
 
 def Hydro_session_process(filepath):
     AutoData, Info = create_df(filepath)
-
+    
     BtInterpedX = freq_interp(
-        AutoData["HydroSurveyor_WaterVelocityXyz_Corrected_DateTime"],
+        AutoData["HydroSurveyor_WaterVelocityXyz_DateTime"],
         AutoData["HydroSurveyor_BottomTrack_m_s"].iloc[:, 0],
         AutoData["HydroSurveyor_BottomTrack_DateTime"],
     )
     BtInterpedY = freq_interp(
-        AutoData["HydroSurveyor_WaterVelocityXyz_Corrected_DateTime"],
+        AutoData["HydroSurveyor_WaterVelocityXyz_DateTime"],
         AutoData["HydroSurveyor_BottomTrack_m_s"].iloc[:, 1],
         AutoData["HydroSurveyor_BottomTrack_DateTime"],
     )
     BtInterpedZ = freq_interp(
-        AutoData["HydroSurveyor_WaterVelocityXyz_Corrected_DateTime"],
+        AutoData["HydroSurveyor_WaterVelocityXyz_DateTime"],
         AutoData["HydroSurveyor_BottomTrack_m_s"].iloc[:, 2],
         AutoData["HydroSurveyor_BottomTrack_DateTime"],
     )
     # Acquire each velocity array from the larger array and transpose them to align with other arrays
-    XVel = AutoData["HydroSurveyor_WaterVelocityXyz_Corrected_m_s"].iloc[:, 0::4].T
-    YVel = AutoData["HydroSurveyor_WaterVelocityXyz_Corrected_m_s"].iloc[:, 1::4].T
-    ZVel = AutoData["HydroSurveyor_WaterVelocityXyz_Corrected_m_s"].iloc[:, 2::4].T
+    XVel = AutoData["HydroSurveyor_WaterVelocityXyz_m_s"].iloc[:, 0::4].T
+    YVel = AutoData["HydroSurveyor_WaterVelocityXyz_m_s"].iloc[:, 1::4].T
+    ZVel = AutoData["HydroSurveyor_WaterVelocityXyz_m_s"].iloc[:, 2::4].T
 
     # Reset their indexes from [0, 4 ,8, 12] to [0,1,2,3]
     XVel.reset_index(drop=True, inplace=True)
@@ -136,7 +136,7 @@ def Hydro_session_process(filepath):
                 VertVel.iloc[gg, floorid:] = np.nan
 
     dates, DT = dtnum_dttime(
-        AutoData["HydroSurveyor_WaterVelocityXyz_Corrected_DateTime"]
+        AutoData["HydroSurveyor_WaterVelocityXyz_DateTime"]
     )
 
     Fs = np.diff(1 / (DT * 86400))
@@ -150,7 +150,7 @@ def Hydro_session_process(filepath):
         "BtVelX": BtInterpedX,
         "BtVelZ": BtInterpedZ,
         "BtVelY": BtInterpedY,
-        "DateNum": AutoData["HydroSurveyor_WaterVelocityXyz_Corrected_DateTime"],
+        "DateNum": AutoData["HydroSurveyor_WaterVelocityXyz_DateTime"],
         "DateTime": dates,
         "Info": Info,
         "XVel": XVel,
@@ -158,8 +158,8 @@ def Hydro_session_process(filepath):
         "ZVel": ZVel,
         "ADP_snr": Beams,
         "VertBeam_snr": AutoData["HydroSurveyor_VerticalBeamSnr_dB"],
-        "VertDepth": AutoData["HydroSurveyor_VerticalBeamRange_Corrected_m"],
-        "UncorrectedVel": AutoData["HydroSurveyor_WaterVelocityXyz_Corrected_m_s"],
+        "VertDepth": AutoData["HydroSurveyor_VerticalBeamRange_m"],
+        "UncorrectedVel": AutoData["HydroSurveyor_WaterVelocityXyz_m_s"],
         "HydroSurveyor_MagneticHeading_deg": AutoData[
             "HydroSurveyor_MagneticHeading_deg"
         ],
