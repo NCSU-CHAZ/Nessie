@@ -17,7 +17,7 @@ from math import floor
 'BurstRawAltimeter_TransmitEnergy', 'BurstRawAltimeter_Magnetometer', 'BurstRawAltimeter_Accelerometer',
 'BurstRawAltimeter_NominalCorrelation', 
 
-'IBurst_Time', 'IBurst_Status', 'IBurst_ExtStatus', 'IBurst_Error', 
+'IBurst_Time', 'IBurst_Status', 'IBurst_ExtStatus', 'eIBurst_Error', 
 'IBurst_EnsembleCount', 'IBurst_NBeams', 'IBurst_NCells', 'IBurst_BeamToChannelMapping', 'IBurst_AmbiguityVel', 
 'IBurst_VelBeam5', 'IBurst_AmpBeam5', 'IBurst_CorBeam5', 'IBurst_Battery', 'IBurst_Heading', 'IBurst_Pitch', 'IBurst_Roll',
 'IBurst_Temperature', 'IBurst_Soundspeed', 'IBurst_Pressure', 'IBurst_PressureSensorTemperature', 'IBurst_RTCTemperature', 
@@ -61,9 +61,8 @@ def read_Sig1k(filepath):  # Create read function
             Data["Data"][0, 0][i]
         )  # Iterate through the nested numpy arrays turning each
         # individual array into a dataframe and saving it to it's key
-
-    T_matrix = Data["Config"][0, 0].dtype['Burst_Beam2xyz']
-    return ADCPData, T_matrix
+    ADCPData['Config'] = Data['Config'][0 , 0]
+    return ADCPData
 
 
 # def combine_Sig1k(filepath): # When the software exports data as a .mat file, if the file size is too large it seperates them into

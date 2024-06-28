@@ -34,7 +34,7 @@ def dtnum_dttime_adcp(
 
 
 def process(filepath):
-    Data, T = read_Sig1k(filepath)  # Load in file
+    Data = read_Sig1k(filepath)  # Load in file
 
     Data["IBurst_Time"] = dtnum_dttime_adcp(Data["IBurst_Time"])
     Data["Burst_Time"] = dtnum_dttime_adcp(Data["Burst_Time"])
@@ -60,16 +60,17 @@ def process(filepath):
     Z2 = ((Data["Burst_VelBeam2"] + Data["Burst_VelBeam4"]) / 2) + np.cos(25)
 
     heading_rad = np.deg2rad(Data["Burst_Heading"])
-    EastVel = X * np.sin(heading_rad) - Y * np.cos(heading_rad)
-    NorthVel = X * np.cos(heading_rad) + Y * np.sin(heading_rad)
-    VertVel1 = Z1
-    VertVel2 = Z2
+    Data['EastVel'] = X * np.sin(heading_rad) - Y * np.cos(heading_rad)
+    Data['NorthVel'] = X * np.cos(heading_rad) + Y * np.sin(heading_rad)
+    Data['VertVel1'] = Z1
+    Data['VertVel2'] = Z2
 
-    Data['EastVel'] = EastVel
-    Data['NorthVel'] = NorthVel
-    Data['VertVel1'] = VertVel1
-    Data['VertVel2'] = VertVel2
+    #Create cell depth vector
+    
+    vector = np.arange(1,Data['Burst_NCells'][0][0]+1)
 
+    Data['CellDepth'] = Data['Config']['Burst_BlankingDistance'][0] + vector*Data['Config']['Burst_CellSize'][0]
+    
     return Data
 
 

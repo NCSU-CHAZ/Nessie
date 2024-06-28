@@ -16,5 +16,11 @@ def RawVel_plotter(Data):
     plt.ylim(top = 2, bottom = -2)
     plt.show()
 
-RawVel_plotter(Data)
+def DepthAvg_plotter(Data):
+    plt.figure()
+    plt.pcolormesh(Data['Burst_Time'],Data['CellDepth'],Data['NorthVel'])
+    plt.show()
 
+#RawVel_plotter(Data)
+
+DepthAvg_plotter(Data)
