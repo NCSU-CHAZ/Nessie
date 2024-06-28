@@ -42,7 +42,7 @@ def process(filepath):
     Data["Echo1Bin1_1000kHz_Time"] = dtnum_dttime_adcp(Data["Echo1Bin1_1000kHz_Time"])
     Data["Echo2Bin1_1000kHz_Time"] = dtnum_dttime_adcp(Data["Echo2Bin1_1000kHz_Time"])
 
-    # QC the data based on correlation values based on the info in Elgar 2001
+    #QC the data based on correlation values based on the info in Elgar 2001
     Sr = 2 #Hz
     CorrThresh = .3 +.4*(Sr/25)**.5
 
@@ -59,11 +59,17 @@ def process(filepath):
     Z1 = ((Data["Burst_VelBeam1"] + Data["Burst_VelBeam3"]) / 2) + np.cos(25)
     Z2 = ((Data["Burst_VelBeam2"] + Data["Burst_VelBeam4"]) / 2) + np.cos(25)
 
+   
+
     heading_rad = np.deg2rad(Data["Burst_Heading"])
-    Data['EastVel'] = X * np.sin(heading_rad) - Y * np.cos(heading_rad)
-    Data['NorthVel'] = X * np.cos(heading_rad) + Y * np.sin(heading_rad)
+
+
+    Data['EastVel'] = X.mul(np.sin(heading_rad)) - Y.mul(np.cos(heading_rad))
+    Data['NorthVel'] = X.mul(np.cos(heading_rad)) + Y.mul(np.sin(heading_rad))
     Data['VertVel1'] = Z1
     Data['VertVel2'] = Z2
+
+
 
     #Create cell depth vector
     
