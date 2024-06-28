@@ -54,4 +54,4 @@ def adcp_comparison(AdcpData, Data, AutoData, LayerData):
     plt.legend()
     plt.show()
 
-adcp_comparison
+adcp_comparison(AdcpData, Data, AutoData)

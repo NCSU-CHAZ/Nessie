@@ -2,7 +2,7 @@ from read_Sig1k import read_Sig1k
 from math import floor
 import datetime as dt
 import numpy as np
-
+import pandas as pd
 
 def dtnum_dttime_adcp(
     time_array,
@@ -53,22 +53,22 @@ def process(filepath):
     # Convert the data from beam coords to ENU (This is all done according to the steps found here
     # https://support.nortekgroup.com/hc/en-us/articles/360029820971-How-is-a-coordinate-transformation-done
 
-
+    
     X = ((Data["Burst_VelBeam1"] - Data["Burst_VelBeam3"]) / 2) + np.sin(25)
     Y = ((Data["Burst_VelBeam2"] - Data["Burst_VelBeam4"]) / 2) + np.sin(25)
     Z1 = ((Data["Burst_VelBeam1"] + Data["Burst_VelBeam3"]) / 2) + np.cos(25)
     Z2 = ((Data["Burst_VelBeam2"] + Data["Burst_VelBeam4"]) / 2) + np.cos(25)
 
-   
+
+    #print(X['Burst_VelBeam1'][16000:19000])
 
     heading_rad = np.deg2rad(Data["Burst_Heading"])
+    heading_rad = pd.DataFrame(np.tile(heading_rad.to_numpy(),(1,32)))
 
-
-    Data['EastVel'] = X.mul(np.sin(heading_rad)) - Y.mul(np.cos(heading_rad))
-    Data['NorthVel'] = X.mul(np.cos(heading_rad)) + Y.mul(np.sin(heading_rad))
+    Data['EastVel'] = X* np.sin(heading_rad) - Y* np.cos(heading_rad)
+    Data['NorthVel'] = X* np.cos(heading_rad) + Y* np.sin(heading_rad)
     Data['VertVel1'] = Z1
     Data['VertVel2'] = Z2
-
 
 
     #Create cell depth vector

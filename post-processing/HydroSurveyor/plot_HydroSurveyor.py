@@ -4,8 +4,6 @@ import numpy as np
 from process_session_HydroSurveyor import Hydro_session_process
 import datetime as dt
 import pandas as pd
-from scipy.signal import medfilt
-from ADCP.process_Sig1k import dtnum_dttime_adcp, process
 
 Data = Hydro_process(
     r"C:\Users\lwlav\OneDrive\Documents\Summer 2024 CHAZ\Data\file_data.mat"
@@ -152,8 +150,6 @@ BT_comparison_plot(Data)
 auto_manual_comparison(AutoData, Data)
 
 depth_velocity_plot(Data)
-
-adcp_comparison(AdcpData, Data, AutoData, LayerData)
 
 Snr_plot(AutoData)
 
