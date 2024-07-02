@@ -4,6 +4,7 @@ import datetime as dt
 import numpy as np
 import pandas as pd
 
+
 def dtnum_dttime_adcp(
     time_array,
 ):  # Create a function to convert from matlabs datenum format to python datetime
@@ -42,44 +43,87 @@ def process(filepath):
     Data["Echo1Bin1_1000kHz_Time"] = dtnum_dttime_adcp(Data["Echo1Bin1_1000kHz_Time"])
     Data["Echo2Bin1_1000kHz_Time"] = dtnum_dttime_adcp(Data["Echo2Bin1_1000kHz_Time"])
 
-    #QC the data based on correlation values based on the info in Elgar 2001
-    Sr = 2 #Hz
-    CorrThresh = .3 +.4*(Sr/25)**.5
+    # QC the data based on correlation values based on the info in Elgar 2001
+    Sr = 2  # Hz
+    CorrThresh = 0.3 + 0.4 * (Sr / 25) ** 0.5
 
-    for i in range(1,5) :
-        isbad = Data[f'Burst_CorBeam{i}']*.01 <= CorrThresh
-        Data[f'Burst_VelBeam{i}'][isbad] = np.nan
-    
+    for i in range(1, 5):
+        isbad = Data[f"Burst_CorBeam{i}"] * 0.01 <= CorrThresh
+        Data[f"Burst_VelBeam{i}"][isbad] = np.nan
+
     # Convert the data from beam coords to ENU (This is all done according to the steps found here
     # https://support.nortekgroup.com/hc/en-us/articles/360029820971-How-is-a-coordinate-transformation-done
 
-    
-    X = ((Data["Burst_VelBeam1"] - Data["Burst_VelBeam3"]) / 2) + np.sin(25)
-    Y = ((Data["Burst_VelBeam2"] - Data["Burst_VelBeam4"]) / 2) + np.sin(25)
-    Z1 = ((Data["Burst_VelBeam1"] + Data["Burst_VelBeam3"]) / 2) + np.cos(25)
-    Z2 = ((Data["Burst_VelBeam2"] + Data["Burst_VelBeam4"]) / 2) + np.cos(25)
+    # Load the transformation matrix
+    T = pd.DataFrame(Data["Config"]["Burst_Beam2xyz"]).to_numpy()
 
+    # Transform attitude data to radians
+    hh = np.pi * (Data["Burst_Heading"].to_numpy() - 90) / 180
+    pp = np.pi * Data["Burst_Pitch"].to_numpy() / 180
+    rr = np.pi * Data["Burst_Roll"].to_numpy() / 180
 
-    #print(X['Burst_VelBeam1'][16000:19000])
+    # Get the dimensions of v1
+    row, col = Data["Burst_VelBeam1"].to_numpy().shape
 
-    heading_rad = np.deg2rad(Data["Burst_Heading"])
-    heading_rad = pd.DataFrame(np.tile(heading_rad.to_numpy(),(1,32)))
+    # Create the tiled transformation matrix
+    Tmat = np.tile(T, (row, 1, 1))
 
-    Data['EastVel'] = X* np.sin(heading_rad) - Y* np.cos(heading_rad)
-    Data['NorthVel'] = X* np.cos(heading_rad) + Y* np.sin(heading_rad)
-    Data['VertVel1'] = Z1
-    Data['VertVel2'] = Z2
+    # Initialize heading and tilt matrices
+    Hmat = np.zeros((3, 3, row))
+    Pmat = np.zeros((3, 3, row))
 
+    # Populate the heading and tilt matrices
+    for i in range(row):
+        Hmat[:, :, i] = [
+            [np.cos(hh[i][0]), np.sin(hh[i][0]), 0],
+            [-np.sin(hh[i][0]), np.cos(hh[i][0]), 0],
+            [0, 0, 1],
+        ]
 
-    #Create cell depth vector
-    
-    vector = np.arange(1,Data['Burst_NCells'][0][0]+1)
+        Pmat[:, :, i] = [
+            [
+                np.cos(pp[i][0]),
+                -np.sin(pp[i][0]) * np.sin(rr[i][0]),
+                -np.cos(rr[i][0]) * np.sin(pp[i][0]),
+            ],
+            [0, np.cos(rr[i][0]), -np.sin(rr[i][0])],
+            [
+                np.sin(pp[i][0]),
+                np.sin(rr[i][0]) * np.cos(pp[i][0]),
+                np.cos(pp[i][0]) * np.cos(rr[i][0]),
+            ],
+        ]
 
-    Data['CellDepth'] = Data['Config']['Burst_BlankingDistance'][0] + vector*Data['Config']['Burst_CellSize'][0]
-    
+    R1Mat = np.zeros((4, 4, row))
+
+    for i in range(row):
+        R1Mat[0:3, 0:3, i] = np.matmul(Hmat[:, :, i], Pmat[:, :, i])
+        R1Mat[3, 0:4, i] = R1Mat[2, 0:4, i]
+        R1Mat[0:4, 3, i] = R1Mat[0:4, 2, i]
+
+    R1Mat[2, 3, :] = 0
+    R1Mat[3, 2, :] = 0
+
+    Rmat = np.zeros((4, 4, row))
+
+    Tmat = np.swapaxes(Tmat, 0, -1)
+    Tmat = np.swapaxes(Tmat, 0, 1)
+
+    for i in range(row):
+        Rmat[:, :, i] = R1Mat[:, :, i] @ Tmat[:, :, i]
+
+    # Convert to ENU
+    ENU = np.einsum('ijk,ijl->ilk', Rmat, Data["Burst_VelBeam1"])
+
+    print(ENU[0,:])
+
+    # Create cell depth vector
+
+    vector = np.arange(1, Data["Burst_NCells"][0][0] + 1)
+
+    Data["CellDepth"] = (
+        Data["Config"]["Burst_BlankingDistance"][0]
+        + vector * Data["Config"]["Burst_CellSize"][0]
+    )
+
     return Data
-
-
-# Data = process(
-#     r"C:\Users\lwlav\OneDrive\Documents\Summer 2024 CHAZ\Data\S103080A004_ICW_test.mat"
-# )

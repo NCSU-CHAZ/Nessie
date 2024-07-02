@@ -61,7 +61,7 @@ def read_Sig1k(filepath):  # Create read function
             Data["Data"][0, 0][i]
         )  # Iterate through the nested numpy arrays turning each
         # individual array into a dataframe and saving it to it's key
-    ADCPData['Config'] = Data['Config'][0 , 0]
+    ADCPData["Config"] = Data["Config"][0, 0]
     return ADCPData
 
 

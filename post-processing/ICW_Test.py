@@ -14,7 +14,9 @@ AutoData = Hydro_session_process(
     r"C:\Users\lwlav\OneDrive\Documents\Summer 2024 CHAZ\Data\session_data.mat"
 )
 
-AdcpData = process(r"C:\Users\lwlav\OneDrive\Documents\Summer 2024 CHAZ\Data\S103080A004_ICW_test.mat")
+AdcpData = process(
+    r"C:\Users\lwlav\OneDrive\Documents\Summer 2024 CHAZ\Data\S103080A004_ICW_test.mat"
+)
 
 # LayerData = pd.read_csv(
 #     r"C:\Users\lwlav\OneDrive\Documents\Summer 2024 CHAZ\Data\vel_vectors.csv",
@@ -23,6 +25,7 @@ AdcpData = process(r"C:\Users\lwlav\OneDrive\Documents\Summer 2024 CHAZ\Data\S10
 # DateTime = pd.to_datetime(LayerData["utc_time"], format="%Y-%m-%d %H:%M:%S.%f")
 # tos = dt.timedelta(hours=4)
 # DateTime = DateTime - tos
+
 
 def adcp_comparison(AdcpData, Data, AutoData, LayerData):
     lw = 1
@@ -53,5 +56,6 @@ def adcp_comparison(AdcpData, Data, AutoData, LayerData):
     plt.ylabel("Velocity (m/s)")
     plt.legend()
     plt.show()
+
 
 adcp_comparison(AdcpData, Data, AutoData)

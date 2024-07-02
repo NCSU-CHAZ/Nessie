@@ -19,7 +19,7 @@ LayerData = pd.read_csv(
 )
 DateTime = pd.to_datetime(LayerData["utc_time"], format="%Y-%m-%d %H:%M:%S.%f")
 tos = dt.timedelta(hours=4)
-DateTime = DateTime - tos
+LayerData['DateTime']= DateTime - tos
 
 
 # MatVel,info = create_df(r"C:\Users\lwlav\OneDrive\Documents\Summer 2024 CHAZ\Data\HydroAnalysisExp.mat"); del info
@@ -128,29 +128,27 @@ def Snr_plot(AutoData):
     plt.show()
 
 
-def ADCP_Data(AdcpData):
+def layer_data(LayerData): 
     plt.figure()
-    plt.plot(
-        dtnum_dttime_adcp(AdcpData["date"]),
-        np.nanmean(AdcpData["VelNorth"], axis=0),
-        label="ADCP Data",
-    )
-    plt.axvline(x=AutoData["DateTime"][0], color="red", label="Start of first session")
-    plt.axvline(x=AutoData["DateTime"][-1], color="red", label="End of first session")
-    plt.title("Aquadopp Velocity versus Time")
+    plt.plot(LayerData["DateTime"], LayerData['average_E'], label="Easting")
+    plt.plot(LayerData["DateTime"], LayerData['average_N'], label="Northing")
+    plt.plot(LayerData["DateTime"], LayerData['average_U'], label="Vertical")
     plt.xlabel("Time (DD HH:MM)")
     plt.ylabel("Velocity (m/s)")
+    plt.title("Raw Velocities vs Time ~~Session~~")
+    plt.legend()
     plt.show()
 
 
-raw_comparison_plot(Data)
 
-BT_comparison_plot(Data)
+# raw_comparison_plot(Data)
 
-auto_manual_comparison(AutoData, Data)
+# BT_comparison_plot(Data)
 
-depth_velocity_plot(Data)
+# auto_manual_comparison(AutoData, Data)
 
-Snr_plot(AutoData)
+# depth_velocity_plot(Data)
 
-#ADCP_Data(AdcpData)
+# Snr_plot(AutoData)
+
+layer_data(LayerData)
