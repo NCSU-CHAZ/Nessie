@@ -8,41 +8,44 @@ Data = process(
 )
 
 
+
 def RawVel_plotter(Data):
 
-    plt.figure()
-    plt.plot(
+    fig, axs = plt.subplots(4)
+    axs[0].plot(
         Data["Burst_Time"],
-        np.nanmean(Data["EastVel"], axis=1),
+        np.nanmean(Data["ENU"][:,:,0], axis=1),
         color="green",
         label="East",
     )
-    plt.plot(
+    axs[1].plot(
         Data["Burst_Time"],
-        np.nanmean(Data["NorthVel"], axis=1),
+        np.nanmean(Data["ENU"][:,:,1], axis=1),
         color="red",
         label="North",
     )
-    plt.plot(
+    axs[2].plot(
         Data["Burst_Time"],
-        np.nanmean(Data["VertVel1"], axis=1),
+        np.nanmean(Data["ENU"][:,:,2], axis=1),
         color="blue",
         label="VertVel1",
     )
-    plt.plot(
+    axs[3].plot(
         Data["Burst_Time"],
-        np.nanmean(Data["VertVel2"], axis=1),
+        np.nanmean(Data["ENU"][:,:,3], axis=1),
         color="gray",
         label="VertVel2",
     )
-    plt.xlim(
-        left=dt.datetime(2024, 6, 24, 13, 25), right=dt.datetime(2024, 6, 24, 13, 26)
-    )
-    plt.ylim(top=1, bottom=-1)
-    plt.legend()
-    plt.title("Different Velocities versus Time")
-    plt.xlabel("Time (DD HH:MM)")
-    plt.ylabel("Velocity (m/s)")
+    for i in range(len(axs)):
+        axs[i].set_xlim(
+            left=dt.datetime(2024, 6, 24, 12, 30), right=dt.datetime(2024, 6, 24, 15, 00)
+        )
+        axs[i].set_ylim(top=1.5, bottom=-.5)
+        axs[i].legend()
+    fig.suptitle("Different Velocities versus Time")
+    fig.supxlabel("Time (DD HH:MM)")
+    fig.supylabel("Velocity (m/s)")
+    fig.tight_layout()
     plt.show()
 
 
@@ -51,9 +54,9 @@ def DepthAvg_plotter(Data):
     plt.pcolormesh(
         Data["Burst_Time"],
         Data["CellDepth"],
-        Data["NorthVel"].T,
-        vmin=0.3 * np.nanmin(Data["NorthVel"]),
-        vmax=0.3 * np.nanmax(Data["NorthVel"]),
+        Data["ENU"][:,:,1].T,
+        vmin=0.3 * np.nanmin(Data["ENU"][:,:,1]),
+        vmax=0.3 * np.nanmax(Data["ENU"][:,:,1]),
         shading="nearest",
         cmap="inferno",
     )
@@ -72,9 +75,9 @@ def hist_plotter(Data):
     plt.hist(Data["Burst_VelBeam1"][18000:18100])
     plt.show()
 
+RawVel_plotter(Data)
 
-# RawVel_plotter(Data)
+DepthAvg_plotter(Data)
 
-# DepthAvg_plotter(Data)
+hist_plotter(Data)
 
-# hist_plotter(Data)

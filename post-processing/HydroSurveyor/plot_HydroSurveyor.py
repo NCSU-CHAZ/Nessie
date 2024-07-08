@@ -135,7 +135,7 @@ def layer_data(LayerData):
     plt.plot(LayerData["DateTime"], LayerData['average_U'], label="Vertical")
     plt.xlabel("Time (DD HH:MM)")
     plt.ylabel("Velocity (m/s)")
-    plt.title("Raw Velocities vs Time ~~Session~~")
+    plt.title("Raw Velocities vs Time ~~Layer~~")
     plt.legend()
     plt.show()
 
@@ -145,7 +145,7 @@ def layer_data(LayerData):
 
 # BT_comparison_plot(Data)
 
-# auto_manual_comparison(AutoData, Data)
+auto_manual_comparison(AutoData, Data)
 
 # depth_velocity_plot(Data)
 

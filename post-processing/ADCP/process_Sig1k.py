@@ -43,14 +43,35 @@ def process(filepath):
     Data["Echo1Bin1_1000kHz_Time"] = dtnum_dttime_adcp(Data["Echo1Bin1_1000kHz_Time"])
     Data["Echo2Bin1_1000kHz_Time"] = dtnum_dttime_adcp(Data["Echo2Bin1_1000kHz_Time"])
 
+    # Get the dimensions of the matrices
+    row, col = Data["Burst_VelBeam1"].to_numpy().shape
+
+    # Create cell depth vector
+
+    vector = np.arange(1, Data["Burst_NCells"][0][0] + 1)
+
+    Data["CellDepth"] = (
+        Data["Config"]["Burst_BlankingDistance"][0]
+        + vector * Data["Config"]["Burst_CellSize"][0]
+    )
+
     # QC the data based on correlation values based on the info in Elgar 2001
     Sr = 2  # Hz
     CorrThresh = 0.3 + 0.4 * (Sr / 25) ** 0.5
 
-    for i in range(1, 5):
-        isbad = Data[f"Burst_CorBeam{i}"] * 0.01 <= CorrThresh
-        Data[f"Burst_VelBeam{i}"][isbad] = np.nan
+    #Remove data thats collected over the surface of water
+    isbad = np.zeros((row,col))
 
+    for i in range(len(isbad)):
+        isbad[i,:] = Data['CellDepth'] >= Data['Burst_Pressure'].iloc[i][0]
+    isbad = isbad.astype(np.bool_)   
+  
+    for jj in range(1, 5):
+            isbad2 = Data[f"Burst_CorBeam{jj}"] * 0.01 <= CorrThresh
+            Data[f"Burst_VelBeam{jj}"][isbad] = np.nan
+            Data[f"Burst_VelBeam{jj}"][isbad2] = np.nan        
+
+   
     # Convert the data from beam coords to ENU (This is all done according to the steps found here
     # https://support.nortekgroup.com/hc/en-us/articles/360029820971-How-is-a-coordinate-transformation-done
 
@@ -62,17 +83,15 @@ def process(filepath):
     pp = np.pi * Data["Burst_Pitch"].to_numpy() / 180
     rr = np.pi * Data["Burst_Roll"].to_numpy() / 180
 
-    # Get the dimensions of v1
-    row, col = Data["Burst_VelBeam1"].to_numpy().shape
-
-    # Create the tiled transformation matrix
+    # Create the tiled transformation matrix, this is for applyinh the transformation later to each data point
     Tmat = np.tile(T, (row, 1, 1))
 
     # Initialize heading and tilt matrices
     Hmat = np.zeros((3, 3, row))
     Pmat = np.zeros((3, 3, row))
 
-    # Populate the heading and tilt matrices
+    # Using vector mat populate the heading matrix and pitch/roll matrix with the appropriate values
+    # The 3x3xrow matrix is the spatial dimensios at each measurement 
     for i in range(row):
         Hmat[:, :, i] = [
             [np.cos(hh[i][0]), np.sin(hh[i][0]), 0],
@@ -94,13 +113,23 @@ def process(filepath):
             ],
         ]
 
-    R1Mat = np.zeros((4, 4, row))
+    #Combine the Hmat and Pmat vectors into one rotation matrix, this conversion matrix is organized with beams in the columns
+    # and the rotation values on the rows (for each data point). The original Hmat and Pmat matrices are only made with the one Z
+    # value in mind so we duplicate the 4 row of the transform matirx to create the fourth, same process for fourht column. 
+    #                     Beam1   Beam2   Beam3   Beam4       
+    #                X   [                               ]        
+    #                Y   [                               ]             (at nth data point)
+    #               Z1   [                          0    ]        
+    #               Z2   [                  0            ]
+    #                                
+    R1Mat = np.zeros((4, 4, row)) #initialize rotation matrix
 
     for i in range(row):
-        R1Mat[0:3, 0:3, i] = np.matmul(Hmat[:, :, i], Pmat[:, :, i])
-        R1Mat[3, 0:4, i] = R1Mat[2, 0:4, i]
-        R1Mat[0:4, 3, i] = R1Mat[0:4, 2, i]
+        R1Mat[0:3, 0:3, i] = Hmat[:, :, i] @ Pmat[:, :, i] #Matrix multiplication 
+        R1Mat[3, 0:4, i] = R1Mat[2, 0:4, i] #Create fourth row
+        R1Mat[0:4, 3, i] = R1Mat[0:4, 2, i] #Create fourth column
 
+    ### We zero out these value since Beams 3 and 4 can't measure both Z's
     R1Mat[2, 3, :] = 0
     R1Mat[3, 2, :] = 0
 
@@ -112,18 +141,12 @@ def process(filepath):
     for i in range(row):
         Rmat[:, :, i] = R1Mat[:, :, i] @ Tmat[:, :, i]
 
+    Velocities = np.squeeze(np.array([[Data['Burst_VelBeam1']], [Data['Burst_VelBeam2']], [Data['Burst_VelBeam3']], [Data['Burst_VelBeam4']]]))
+    
     # Convert to ENU
-    ENU = np.einsum('ijk,ijl->ilk', Rmat, Data["Burst_VelBeam1"])
-
-    print(ENU[0,:])
-
-    # Create cell depth vector
-
-    vector = np.arange(1, Data["Burst_NCells"][0][0] + 1)
-
-    Data["CellDepth"] = (
-        Data["Config"]["Burst_BlankingDistance"][0]
-        + vector * Data["Config"]["Burst_CellSize"][0]
-    )
+    ENU = np.einsum('ijk,jkl->ikl', Rmat, Velocities)
+    ENU = np.transpose(ENU, (1,2,0))
+    Data['ENU'] = ENU; del ENU
 
     return Data
+
