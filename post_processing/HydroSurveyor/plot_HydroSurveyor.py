@@ -139,8 +139,6 @@ def layer_data(LayerData):
     plt.legend()
     plt.show()
 
-
-
 # raw_comparison_plot(Data)
 
 # BT_comparison_plot(Data)
