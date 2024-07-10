@@ -2,7 +2,7 @@ import numpy as np
 from scipy.interpolate import interp1d
 import pandas as pd
 import datetime as dt
-from read_HydroSurveyor import create_df
+from .read_HydroSurveyor import create_df
 from math import floor
 import matplotlib.pyplot as plt
 

@@ -1,4 +1,4 @@
-from read_Sig1k import read_Sig1k
+from .read_Sig1k import read_Sig1k
 from math import floor
 import datetime as dt
 import numpy as np
@@ -147,6 +147,23 @@ def process(filepath):
     ENU = np.einsum('ijk,jkl->ikl', Rmat, Velocities)
     ENU = np.transpose(ENU, (1,2,0))
     Data['ENU'] = ENU; del ENU
+
+    # Add matrices with NaN values together without getting nans from the whole thing
+    nan_mask = (np.full((row,col), False))
+
+    for i in range(col):
+        nan_mask[:,i] = np.isfinite(Data['ENU'][:,i,0]) & np.isfinite(Data['ENU'][:,i,1]) & np.isfinite(Data['ENU'][:,i,2])
+    
+    # Replace NaNs with zeroes for the calculation
+    NorthVel_no_nan = np.nan_to_num(Data['ENU'][:,:,0], nan=0.0)
+    EastVel_no_nan = np.nan_to_num(Data['ENU'][:,:,1], nan=0.0)
+    VertVel_no_nan = np.nan_to_num(Data['ENU'][:,:,2], nan=0.0)
+
+    # Sum the squared velocities
+    Data['AbsVel'] = pd.DataFrame(np.sqrt(NorthVel_no_nan**2 + EastVel_no_nan**2 + VertVel_no_nan**2))
+
+    # Reapply the mask to set positions with any original NaNs back to NaN
+    Data['AbsVel'][~nan_mask] = np.nan
 
     return Data
 

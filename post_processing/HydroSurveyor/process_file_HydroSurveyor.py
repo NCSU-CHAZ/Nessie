@@ -2,7 +2,7 @@ import numpy as np
 from scipy.interpolate import interp1d
 import pandas as pd
 import datetime as dt
-from read_HydroSurveyor import vector_df
+from .read_HydroSurveyor import vector_df
 from math import floor
 
 
@@ -91,11 +91,12 @@ def Hydro_process(filepath):
     rawdata, WaterEastVel, WaterNorthVel, WaterVertVel, WaterErrVal, Info = vector_df(
         filepath
     )
-    
+
     EastVel = WaterEastVel.subtract(rawdata["BtVelEnu_m_s"].iloc[:, 0], axis=0)
     NorthVel = WaterNorthVel.subtract(rawdata["BtVelEnu_m_s"].iloc[:, 1], axis=0)
     VertVel = WaterVertVel.subtract(rawdata["BtVelEnu_m_s"].iloc[:, 2], axis=0)
     BtVel = rawdata["BtVelEnu_m_s"]
+    
     # Correct for vertical beam ranges
     cellnum = np.arange(0, WaterEastVel.shape[1])
     CellGrid = np.outer(cellnum, rawdata["CellSize_m"])
@@ -110,6 +111,30 @@ def Hydro_process(filepath):
     EastVel[isbad] = float("NaN")
     NorthVel[isbad] = float("NaN")
     VertVel[isbad] = float("NaN")
+
+    # Remove the .75 meters of data at each sample since the data isn't routinely low SnR
+    cutoff = 0.75
+    mask = CellGrid < cutoff
+
+    EastVel[mask] = float("NaN")
+    NorthVel[mask] = float("NaN")
+    VertVel[mask] = float("NaN")
+
+    # Add matrices with NaN values together without getting nans from the whole thing
+    nan_mask = (np.full(dim, False))
+    for i in range(dim[1]):
+        nan_mask[:,i] = np.isfinite(NorthVel.iloc[:,i]) & np.isfinite(EastVel.iloc[:,i]) & np.isfinite(VertVel.iloc[:,i])
+
+    # Replace NaNs with zeroes for the calculation
+    NorthVel_no_nan = np.nan_to_num(NorthVel, nan=0.0)
+    EastVel_no_nan = np.nan_to_num(EastVel, nan=0.0)
+    VertVel_no_nan = np.nan_to_num(VertVel, nan=0.0)
+
+    # Sum the squared velocities
+    AbsVel = np.sqrt(NorthVel_no_nan**2 + EastVel_no_nan**2 + VertVel_no_nan**2)
+
+    # Reapply the mask to set positions with any original NaNs back to NaN
+    AbsVel[~nan_mask] = np.nan
 
     EastVel_interp, interpCellDepth = cellsize_interp(
         EastVel, rawdata["CellSize_m"], CellGrid, 2
@@ -139,5 +164,6 @@ def Hydro_process(filepath):
         "CellSize_m": rawdata["CellSize_m"],
         "VbDepth_m": rawdata["VbDepth_m"],
         "Info": Info,
+        "AbsVel": pd.DataFrame(AbsVel),
     }
     return Data

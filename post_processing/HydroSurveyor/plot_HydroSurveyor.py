@@ -141,12 +141,12 @@ def layer_data(LayerData):
 
 # raw_comparison_plot(Data)
 
-# BT_comparison_plot(Data)
+BT_comparison_plot(Data)
 
-auto_manual_comparison(AutoData, Data)
+#auto_manual_comparison(AutoData, Data)
 
 # depth_velocity_plot(Data)
 
 # Snr_plot(AutoData)
 
-layer_data(LayerData)
+#layer_data(LayerData)
