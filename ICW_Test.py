@@ -3,9 +3,10 @@ import matplotlib.pyplot as plt
 from post_processing.HydroSurveyor.process_session_HydroSurveyor import Hydro_session_process 
 from scipy.signal import medfilt
 from post_processing.ADCP.process_Sig1k import process
-import numpy as np
+from post_processing.HydroSurveyor.read_HydroSurveyor import vector_df
 import pandas as pd
 import datetime as dt
+import numpy as np
 
 Data = Hydro_process(
     r"C:\Users\lwlav\OneDrive\Documents\Summer 2024 CHAZ\Data\file_data.mat"
@@ -187,18 +188,18 @@ def adcp_comparison_Abs(AdcpData, Data, AutoData, LayerData):
     plt.figure()
     plt.plot(
         (AdcpData["Burst_Time"]),
-        (pd.DataFrame(np.nanmean(AdcpData["AbsVel"], axis=1)).rolling(window = 4).mean()),
+        (pd.DataFrame(np.nanmean(AdcpData["AbsVel"], axis=1))),
         label="ADCP Data",
     )
     plt.plot(
         Data["DateTime"],
-        (pd.DataFrame(np.nanmean(Data["AbsVel"], axis=1)).rolling(window = 4).mean()),
+        (pd.DataFrame(np.nanmean(Data["AbsVel"], axis=1))),
         color="Red",
         label="File Data",
         linewidth=lw,
     )
 
-    plt.plot(DateTime, AbsVel.rolling(window = 4).mean(), label="Layer Data", linewidth=lw)
+    plt.plot(DateTime, AbsVel, label="Layer Data", linewidth=lw)
     plt.xlim(AutoData["DateTime"][0], AutoData["DateTime"][-1])
     plt.title("Absolute Velocities vs Time")
     plt.xlabel("Time (DD HH:MM)")
@@ -230,6 +231,117 @@ def adcp_comparison_Abs(AdcpData, Data, AutoData, LayerData):
     
     plt.show()
 
+def Vel_subplots(AdcpData, Data):
+    fig, ax = plt.subplots(4)
+    lw = 1
+    ax[0].plot(
+            (AdcpData["Burst_Time"]),
+            (pd.DataFrame(np.nanmean(AdcpData["AbsVel"], axis=1))),
+            label="ADCP Data",
+        )
+    ax[0].plot(
+            Data["DateTime"],
+            (pd.DataFrame(np.nanmean(Data["AbsVel"], axis=1))),
+            color="Red",
+            label="File Data",
+            linewidth=lw,)
+    ax[0].plot(DateTime, AbsVel, label="Layer Data", linewidth=lw)
+    ax[0].set_xlim(dt.datetime(2024,6,24,14,9,28),(dt.datetime(2024,6,24,14,10,33)))
+
+    ax[1].plot(
+            (AdcpData["Burst_Time"]),
+            (pd.DataFrame(np.nanmean(AdcpData["AbsVel"], axis=1))),
+            label="ADCP Data",
+        )
+    ax[1].plot(
+            Data["DateTime"],
+            (pd.DataFrame(np.nanmean(Data["AbsVel"], axis=1))),
+            color="Red",
+            label="File Data",
+            linewidth=lw,)
+    ax[1].plot(DateTime, AbsVel, label="Layer Data", linewidth=lw)
+    ax[1].set_xlim(dt.datetime(2024,6,24,14,15,29),(dt.datetime(2024,6,24,14,16,27)))
+
+
+    ax[2].plot(
+            (AdcpData["Burst_Time"]),
+            (pd.DataFrame(np.nanmean(AdcpData["AbsVel"], axis=1))),
+            label="ADCP Data",
+        )
+    ax[2].plot(
+            Data["DateTime"],
+            (pd.DataFrame(np.nanmean(Data["AbsVel"], axis=1))),
+            color="Red",
+            label="File Data",
+            linewidth=lw,)
+    ax[2].plot(DateTime, AbsVel, label="Layer Data", linewidth=lw)
+    ax[2].set_xlim(dt.datetime(2024,6,24,14,25,2),(dt.datetime(2024,6,24,14,28,17)))
+
+    ax[3].plot(
+            (AdcpData["Burst_Time"]),
+            (pd.DataFrame(np.nanmean(AdcpData["AbsVel"], axis=1))),
+            label="ADCP Data",
+        )
+    ax[3].plot(
+            Data["DateTime"],
+            (pd.DataFrame(np.nanmean(Data["AbsVel"], axis=1))),
+            color="Red",
+            label="File Data",
+            linewidth=lw,)
+    ax[3].plot(DateTime, AbsVel, label="Layer Data", linewidth=lw)
+    ax[3].set_xlim(dt.datetime(2024,6,24,14,35,30),DateTime.iloc[-1])
+
+    for i in range(len(ax)):
+            ax[i].set_ylim(top=1, bottom=.4)
+            ax[i].legend()
+    fig.suptitle("Different Velocities versus Time")
+    fig.supxlabel("Time (DD HH:MM)")
+    fig.supylabel("Velocity (m/s)")
+    fig.tight_layout()
+    plt.show()
+
+###
+
+def raw_process_comp(AdcpData, Data):
+    raw, EastVel, NorthVel, VertVel, D, I = vector_df(r"C:\Users\lwlav\OneDrive\Documents\Summer 2024 CHAZ\Data\file_data.mat"); del I, raw, D
+    dim = EastVel.shape
+
+    nan_mask = (np.full(dim, False))
+
+    for i in range(dim[1]):
+        nan_mask[:,i] = np.isfinite(NorthVel.iloc[:,i]) & np.isfinite(EastVel.iloc[:,i]) & np.isfinite(VertVel.iloc[:,i])
+
+    # Replace NaNs with zeroes for the calculation
+    NorthVel_no_nan = np.nan_to_num(NorthVel, nan=0.0)
+    EastVel_no_nan = np.nan_to_num(EastVel, nan=0.0)
+    VertVel_no_nan = np.nan_to_num(VertVel, nan=0.0)
+    BtVel = np.nan_to_num(Data['BtVel'], nan=0.0)
+
+    # Sum the squared velocities
+    AbsVel = np.sqrt(NorthVel_no_nan**2 + EastVel_no_nan**2 + VertVel_no_nan**2)
+    BtVel = np.sqrt(BtVel[:,0]**2 + BtVel[:,1]**2 + BtVel[:,2]**2)
+
+    # Reapply the mask to set positions with any original NaNs back to NaN
+    AbsVel[~nan_mask] = np.nan
+
+    fig, axs = plt.subplots(2)
+    axs[0].plot(Data['DateTime'],np.nanmean(Data['AbsVel'], axis = 1), label = 'Corrected')
+    axs[0].plot(Data['DateTime'],np.nanmean(AbsVel, axis = 1), label = 'Uncorrected')
+    axs[0].legend()
+
+    axs[1].plot(Data['DateTime'], BtVel, label = 'BottomTrackVel')
+    axs[1].legend()
+
+    fig.suptitle("Looking at the BT influence on velocities")
+    fig.supxlabel("Time (DD HH:MM)")
+    fig.supylabel("Velocity (m/s)")
+    fig.tight_layout()
+
+    plt.show()
+
+
+
+
 # adcp_comparison_North(AdcpData, Data, AutoData, LayerData)
 
 # adcp_comparison_East(AdcpData, Data, AutoData, LayerData)
@@ -238,70 +350,6 @@ def adcp_comparison_Abs(AdcpData, Data, AutoData, LayerData):
 
 # adcp_comparison_Abs(AdcpData, Data, AutoData, LayerData)
 
-# fig, ax = plt.subplots(4)
-# lw = 1
-# ax[0].plot(
-#         (AdcpData["Burst_Time"]),
-#         (pd.DataFrame(np.nanmean(AdcpData["AbsVel"], axis=1))),
-#         label="ADCP Data",
-#     )
-# ax[0].plot(
-#         Data["DateTime"],
-#         (pd.DataFrame(np.nanmean(Data["AbsVel"], axis=1))),
-#         color="Red",
-#         label="File Data",
-#         linewidth=lw,)
-# ax[0].plot(DateTime, AbsVel, label="Layer Data", linewidth=lw)
-# ax[0].set_xlim(dt.datetime(2024,6,24,14,9,28),(dt.datetime(2024,6,24,14,10,33)))
+# Vel_subplots(AdcpData,Data)
 
-# ax[1].plot(
-#         (AdcpData["Burst_Time"]),
-#         (pd.DataFrame(np.nanmean(AdcpData["AbsVel"], axis=1))),
-#         label="ADCP Data",
-#     )
-# ax[1].plot(
-#         Data["DateTime"],
-#         (pd.DataFrame(np.nanmean(Data["AbsVel"], axis=1))),
-#         color="Red",
-#         label="File Data",
-#         linewidth=lw,)
-# ax[1].plot(DateTime, AbsVel, label="Layer Data", linewidth=lw)
-# ax[1].set_xlim(dt.datetime(2024,6,24,14,15,29),(dt.datetime(2024,6,24,14,16,27)))
-
-
-# ax[2].plot(
-#         (AdcpData["Burst_Time"]),
-#         (pd.DataFrame(np.nanmean(AdcpData["AbsVel"], axis=1))),
-#         label="ADCP Data",
-#     )
-# ax[2].plot(
-#         Data["DateTime"],
-#         (pd.DataFrame(np.nanmean(Data["AbsVel"], axis=1))),
-#         color="Red",
-#         label="File Data",
-#         linewidth=lw,)
-# ax[2].plot(DateTime, AbsVel, label="Layer Data", linewidth=lw)
-# ax[2].set_xlim(dt.datetime(2024,6,24,14,25,2),(dt.datetime(2024,6,24,14,28,17)))
-
-# ax[3].plot(
-#         (AdcpData["Burst_Time"]),
-#         (pd.DataFrame(np.nanmean(AdcpData["AbsVel"], axis=1))),
-#         label="ADCP Data",
-#     )
-# ax[3].plot(
-#         Data["DateTime"],
-#         (pd.DataFrame(np.nanmean(Data["AbsVel"], axis=1))),
-#         color="Red",
-#         label="File Data",
-#         linewidth=lw,)
-# ax[3].plot(DateTime, AbsVel, label="Layer Data", linewidth=lw)
-# ax[3].set_xlim(dt.datetime(2024,6,24,14,35,30),DateTime.iloc[-1])
-
-# for i in range(len(ax)):
-#         ax[i].set_ylim(top=1, bottom=.4)
-#         ax[i].legend()
-# fig.suptitle("Different Velocities versus Time")
-# fig.supxlabel("Time (DD HH:MM)")
-# fig.supylabel("Velocity (m/s)")
-# fig.tight_layout()
-# plt.show()
+raw_process_comp(AdcpData, Data)
