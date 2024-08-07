@@ -34,7 +34,7 @@ def RawVel_plotter(Data):
         Data["Burst_Time"],
         np.nanmean(Data["ENU"][:,:,3], axis=1),
         color="gray",
-        label="VertVel2",
+        label="Differennce",
     )
     for i in range(len(axs)):
         axs[i].set_xlim(
@@ -64,7 +64,8 @@ def DepthAvg_plotter(Data):
         left=dt.datetime(2024, 6, 24, 12, 25), right=dt.datetime(2024, 6, 24, 15, 00)
     )
     plt.xlabel("Date (DD HH:MM)")
-    plt.ylabel("Depth m")
+    plt.ylabel("Depth (m)")
+    plt.title('Velocity over Depth on 6/24/24')
     im1 = plt.colorbar()
     im1.ax.set_ylabel("Velocity (m/s)")
     plt.show()
@@ -79,5 +80,5 @@ RawVel_plotter(Data)
 
 DepthAvg_plotter(Data)
 
-hist_plotter(Data)
+# hist_plotter(Data)
 

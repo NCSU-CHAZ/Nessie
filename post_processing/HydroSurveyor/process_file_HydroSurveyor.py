@@ -97,6 +97,10 @@ def Hydro_process(filepath):
     VertVel = WaterVertVel.subtract(rawdata["BtVelEnu_m_s"].iloc[:, 2], axis=0)
     BtVel = rawdata["BtVelEnu_m_s"]
     
+    EastVel.reset_index(drop=True, inplace=True)
+    NorthVel.reset_index(drop=True, inplace=True)
+    VertVel.reset_index(drop=True, inplace=True)
+
     # Correct for vertical beam ranges
     cellnum = np.arange(0, WaterEastVel.shape[1])
     CellGrid = np.outer(cellnum, rawdata["CellSize_m"])
@@ -119,6 +123,21 @@ def Hydro_process(filepath):
     EastVel[mask] = float("NaN")
     NorthVel[mask] = float("NaN")
     VertVel[mask] = float("NaN")
+
+    # Apply an acceleration mask the nans value of a certain acceleration
+    cutoff = .45 #m/s^2
+
+    accelE = rawdata["BtVelEnu_m_s"].iloc[:, 0].diff()
+    accelN = rawdata["BtVelEnu_m_s"].iloc[:, 1].diff()
+    accelV = rawdata["BtVelEnu_m_s"].iloc[:, 2].diff()
+
+    maskE = accelE > cutoff
+    maskN = accelN > cutoff
+    maskV = accelV > cutoff
+
+    EastVel[maskE] = float("NaN")
+    NorthVel[maskN] = float("NaN")
+    VertVel[maskV] = float("NaN")
 
     # Add matrices with NaN values together without getting nans from the whole thing
     nan_mask = (np.full(dim, False))
@@ -165,5 +184,6 @@ def Hydro_process(filepath):
         "VbDepth_m": rawdata["VbDepth_m"],
         "Info": Info,
         "AbsVel": pd.DataFrame(AbsVel),
+        "AccelE": accelE
     }
     return Data

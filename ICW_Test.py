@@ -342,7 +342,7 @@ def raw_process_comp(AdcpData, Data):
 
 
 
-# adcp_comparison_North(AdcpData, Data, AutoData, LayerData)
+adcp_comparison_North(AdcpData, Data, AutoData, LayerData)
 
 # adcp_comparison_East(AdcpData, Data, AutoData, LayerData)
 
@@ -352,4 +352,4 @@ def raw_process_comp(AdcpData, Data):
 
 # Vel_subplots(AdcpData,Data)
 
-raw_process_comp(AdcpData, Data)
+#raw_process_comp(AdcpData, Data)
