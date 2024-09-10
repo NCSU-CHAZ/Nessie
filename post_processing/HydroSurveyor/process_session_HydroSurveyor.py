@@ -69,7 +69,7 @@ def Hydro_session_qc(VelArray, Snr, SnrThresh):
 
 def Hydro_session_process(filepath):
     AutoData, Info = create_df(filepath)
-    
+
     BtInterpedX = freq_interp(
         AutoData["HydroSurveyor_WaterVelocityXyz_DateTime"],
         AutoData["HydroSurveyor_BottomTrack_m_s"].iloc[:, 0],
@@ -109,9 +109,45 @@ def Hydro_session_process(filepath):
     YVel = Hydro_session_qc(YVel, Beam2, 16)
     ZVel = Hydro_session_qc(ZVel, Beam3, 16)
 
-    # Acquire Vessel HEading and switch from degrres to radians
+    # Acquire Vessel Heading, pitch, roll and switch from degrres to radians
     heading_rad = np.deg2rad(AutoData["HydroSurveyor_MagneticHeading_deg"])
     heading_rad = heading_rad.values.reshape(-1, 1)
+
+    #Beginning of unfinished code to use a rotation matrix to convert from xyz to enu
+
+    # pp = np.deg2rad(AutoData["HydroSurveyor_Pitch_deg"])
+    # rr = np.deg2rad(AutoData["HydroSurveyor_Roll_deg"])
+
+    # # Create transformation matrix, note that this is the ideal matrix, this does not account for possible misalignment of the beams.
+    # # Ordinarily the software gives the matrix assigned by the company.
+    # T_matrix = np.zeros((4, 4))
+    # theta = np.deg2rad(25)
+    # c = 1  # -1 for concave head, +1 for convex head
+    # a = 1 / (2 * np.sin(theta))
+    # b = 1 / (4 * np.cos(theta))
+    # d = a / (np.sqrt(2))
+    # T_matrix[:, :] = [
+    #     [c * a, -c * a, 0, 0],
+    #     [0, 0, -c * a, c * a],
+    #     [b, b, b, b],
+    #     [d, d, d, d],
+    # ]
+    # print(heading_rad[0][0])
+    # # Create the heading matrix
+    # H = [
+    #     [np.cos(heading_rad[i][0]), np.sin(heading_rad), 0],
+    #     [-np.sin(heading_rad), np.cos(heading_rad), 0],
+    #     [0, 0, 1],
+    # ]
+
+    # # Make tilt matrix
+    # P = [
+    #     [np.cos(pp), -np.sin(pp) * np.sin(rr), -np.cos(rr) * np, np.sin(pp)],
+    #     [0, np.cos(rr), -np.sin(rr)],
+    #     [np.sin(pp), np.sin(rr) * np.cos(pp), np.cos(pp) * np.cos(rr)],
+    # ]
+    # #Create rotation matrix
+    # R = H*P*T_matrix
 
     # Change from XYZ to ENUD
     EastVel = XVel * np.sin(heading_rad) - YVel * np.cos(heading_rad)
@@ -120,7 +156,7 @@ def Hydro_session_process(filepath):
 
     Beams = [Beam1, Beam2, Beam3, Beam4]
 
-    # Use the beam signal to noise rations to find which cell detects the bottom and nan everything below
+    # Use the beam signal to noise ratios to find which cell detects the bottom and nan everything below
     i = 0
     for WhichBeam in Beams:
         i += 1
@@ -135,9 +171,7 @@ def Hydro_session_process(filepath):
             if i == 3:
                 VertVel.iloc[gg, floorid:] = np.nan
 
-    dates, DT = dtnum_dttime(
-        AutoData["HydroSurveyor_WaterVelocityXyz_DateTime"]
-    )
+    dates, DT = dtnum_dttime(AutoData["HydroSurveyor_WaterVelocityXyz_DateTime"])
 
     Fs = np.diff(1 / (DT * 86400))
 

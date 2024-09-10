@@ -107,6 +107,12 @@ def Hydro_process(filepath):
     CellGrid = np.add(rawdata["CellStart_m"].to_numpy(), (CellGrid.swapaxes(0, 1)))
     CellGrid = CellGrid + 0.1651
 
+    # Map the cell depth by compensating for sever tilt and pitch during measurements.
+    # This code will take the angle of the pitch measurements and find the true cell depth each beam is at.
+    # For example, if the pitch is -.1 rad (the nose is pointed up) the forward facing beam would be at an angle
+    # facing forwards causing each cell to be at an angle and for the cellgrid to not accurately measure the depth of the cell.
+    # The depth would instead be at tan()
+
     # Remove Data below vertical beam range
     dim = WaterEastVel.shape
     mask = np.tile(rawdata["VbDepth_m"], (1, dim[1]))

@@ -1,4 +1,4 @@
-from read_Sig1k import read_Sig1k
+from .read_Sig1k import read_Sig1k
 from math import floor
 import datetime as dt
 import numpy as np
@@ -116,7 +116,7 @@ def process(filepath):
 
     #Combine the Hmat and Pmat vectors into one rotation matrix, this conversion matrix is organized with beams in the columns
     # and the rotation values on the rows (for each data point). The original Hmat and Pmat matrices are only made with the one Z
-    # value in mind so we duplicate the 4 row of the transform matirx to create the fourth, same process for fourht column. 
+    # value in mind so we duplicate the 4 row of the transform matirx to create the fourth, same process for fourth column. 
     #                     Beam1   Beam2   Beam3   Beam4       
     #                X   [                               ]        
     #                Y   [                               ]             (at nth individual sample)

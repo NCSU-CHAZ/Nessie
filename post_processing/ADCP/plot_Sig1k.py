@@ -70,15 +70,28 @@ def DepthAvg_plotter(Data):
     im1.ax.set_ylabel("Velocity (m/s)")
     plt.show()
 
+def surface_plot(Data):
+    linew = .5
+    plt.plot(Data['Burst_Time'], Data['Burst_Pressure'], label = 'Pressure', lw = linew)
+    plt.plot(Data['Burst_Time'], Data['Burst_AltimeterDistanceAST'], label = 'AST', lw = linew)
+    plt.plot(Data['Burst_Time'], Data['Burst_AltimeterDistanceLE'], label = 'LE', lw = linew)
+    plt.xlim(left=dt.datetime(2024, 6, 24, 12, 25), right=dt.datetime(2024, 6, 24, 15, 00))
+    plt.title("Pressure vs Altimeter Data")
+    plt.xlabel("Time (DD HH:MM)")
+    plt.ylabel("Depth (m)")
+    plt.legend()
+    plt.show()
 
 def hist_plotter(Data):
     plt.figure()
     plt.hist(Data["Burst_VelBeam1"][18000:18100])
     plt.show()
 
-RawVel_plotter(Data)
+# RawVel_plotter(Data)
 
-DepthAvg_plotter(Data)
+# DepthAvg_plotter(Data)
+
+surface_plot(Data)
 
 # hist_plotter(Data)
 

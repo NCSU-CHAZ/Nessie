@@ -342,7 +342,7 @@ def raw_process_comp(AdcpData, Data):
 
 
 
-adcp_comparison_North(AdcpData, Data, AutoData, LayerData)
+#4adcp_comparison_North(AdcpData, Data, AutoData, LayerData)
 
 # adcp_comparison_East(AdcpData, Data, AutoData, LayerData)
 
