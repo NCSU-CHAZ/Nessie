@@ -55,19 +55,20 @@ def process(filepath):
         + vector * Data["Config"]["Burst_CellSize"][0]
     )
 
-    # QC the data based on correlation values based on the info in Elgar 2001
-    Sr = 2  # Hz
-    CorrThresh = 0.3 + 0.4 * (Sr / 25) ** 0.5
-
-    #Remove data thats collected over the surface of water
-    isbad = np.zeros((row,col))
+    # QC the data based on correlation values based on the info in Elgar 2001 and
+    # remove data thats collected over the surface of the water and remove the influence of the side lobes.
+    # We will do this according to the processes in the ADCP Comprenhensive Manual from Nortek.
+    Sr = Data["Config"]["Burst_SamplingRate"][0][0] # Sample rate in Hz
+    CorrThresh = 0.3 + 0.4 * (Sr / 25) ** 0.5 #Threshold for correlation values as found in Elgar
+    isbad = np.zeros((row,col)) # Initialize mask for above surface measurements
 
     for i in range(len(isbad)):
-        isbad[i,:] = Data['CellDepth'] >= Data['Burst_Pressure'].iloc[i][0]
-    isbad = isbad.astype(np.bool_)   
+        Depth_Thresh = Data['Burst_Pressure'].iloc[i][0]*np.cos(25*np.pi/180) - Data["Config"]["Burst_CellSize"][0]
+        isbad[i,:] = Data['CellDepth'] >= Depth_Thresh
+    isbad = isbad.astype(np.bool_)    
   
     for jj in range(1, 5):
-            isbad2 = Data[f"Burst_CorBeam{jj}"] * 0.01 <= CorrThresh
+            isbad2 = Data[f"Burst_CorBeam{jj}"] * 0.01 <= CorrThresh # create mask for bad correlations 
             Data[f"Burst_VelBeam{jj}"][isbad] = np.nan
             Data[f"Burst_VelBeam{jj}"][isbad2] = np.nan        
 
@@ -115,10 +116,10 @@ def process(filepath):
 
     #Combine the Hmat and Pmat vectors into one rotation matrix, this conversion matrix is organized with beams in the columns
     # and the rotation values on the rows (for each data point). The original Hmat and Pmat matrices are only made with the one Z
-    # value in mind so we duplicate the 4 row of the transform matirx to create the fourth, same process for fourht column. 
+    # value in mind so we duplicate the 4 row of the transform matirx to create the fourth, same process for fourth column. 
     #                     Beam1   Beam2   Beam3   Beam4       
     #                X   [                               ]        
-    #                Y   [                               ]             (at nth data point)
+    #                Y   [                               ]             (at nth individual sample)
     #               Z1   [                          0    ]        
     #               Z2   [                  0            ]
     #                                
@@ -148,7 +149,9 @@ def process(filepath):
     ENU = np.transpose(ENU, (1,2,0))
     Data['ENU'] = ENU; del ENU
 
-    # Add matrices with NaN values together without getting nans from the whole thing
+    Data['ENU'][:,:,3] = abs(Data['ENU'][:,:,2]-Data['ENU'][:,:,3])
+                             
+    # Add matrices with NaN values together treating nan values as 0, this for calculating the absolute velocity 
     nan_mask = (np.full((row,col), False))
 
     for i in range(col):
