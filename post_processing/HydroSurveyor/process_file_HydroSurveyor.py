@@ -23,7 +23,7 @@ def dtnum_dttime(time_array):
     DT = (
         DT / (1 * 10**6) / (86400) + 730486
     )  # Convert fron hydrosurveyor time which is microseconds since Jan 01 2000 (or in datenum 730486)
-    for ordinal in DT:
+    for ordinal in DT:  
         integer = floor(ordinal[0])
         frac = ordinal - integer
         date = dt.datetime.fromordinal(integer)
@@ -125,25 +125,25 @@ def Hydro_process(filepath):
     # Remove the .75 meters of data at each sample since the data isn't routinely low SnR
     cutoff = 0.75
     mask = CellGrid < cutoff
-
+    print(mask)
     EastVel[mask] = float("NaN")
     NorthVel[mask] = float("NaN")
     VertVel[mask] = float("NaN")
 
     # Apply an acceleration mask the nans value of a certain acceleration
-    cutoff = .45 #m/s^2
+    # cutoff = .45 #m/s^2
 
-    accelE = rawdata["BtVelEnu_m_s"].iloc[:, 0].diff()
-    accelN = rawdata["BtVelEnu_m_s"].iloc[:, 1].diff()
-    accelV = rawdata["BtVelEnu_m_s"].iloc[:, 2].diff()
+    # accelE = rawdata["BtVelEnu_m_s"].iloc[:, 0].diff()
+    # accelN = rawdata["BtVelEnu_m_s"].iloc[:, 1].diff()
+    # accelV = rawdata["BtVelEnu_m_s"].iloc[:, 2].diff()
 
-    maskE = accelE > cutoff
-    maskN = accelN > cutoff
-    maskV = accelV > cutoff
+    # maskE = accelE > cutoff
+    # maskN = accelN > cutoff
+    # maskV = accelV > cutoff
 
-    EastVel[maskE] = float("NaN")
-    NorthVel[maskN] = float("NaN")
-    VertVel[maskV] = float("NaN")
+    # EastVel[maskE] = float("NaN")
+    # NorthVel[maskN] = float("NaN")
+    # VertVel[maskV] = float("NaN")
 
     # Add matrices with NaN values together without getting nans from the whole thing
     nan_mask = (np.full(dim, False))
@@ -170,7 +170,7 @@ def Hydro_process(filepath):
     VertVel_interp, interpCellDepth = cellsize_interp(
         VertVel, rawdata["CellSize_m"], CellGrid, 2
     )
-
+   
     dates = dtnum_dttime(rawdata["DateTime"])
 
     Data = {
@@ -188,8 +188,8 @@ def Hydro_process(filepath):
         "DateTime": dates,
         "CellSize_m": rawdata["CellSize_m"],
         "VbDepth_m": rawdata["VbDepth_m"],
+        "SampleNumber" : rawdata['SampleNumber'],
         "Info": Info,
-        "AbsVel": pd.DataFrame(AbsVel),
-        "AccelE": accelE
+        "AbsVel": pd.DataFrame(AbsVel)
     }
     return Data

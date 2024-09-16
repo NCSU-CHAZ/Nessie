@@ -1,6 +1,6 @@
 from scipy.io import loadmat
 import pandas as pd
-
+import os
 
 # Import .mat files
 def create_df(filepath):
@@ -43,9 +43,30 @@ def create_df(filepath):
     return data, Info
 
 
+# This funciton will combine all the different sessions into one large session
+def combine_sessions(filepath):
+    LastData = pd.DataFrame([])
+    i = 0
+    for name in os.listdir(filepath):
+        Data, info = create_df(filepath + "\\" + str(name))
+        if i == 0:
+            CombinedData = Data.copy()
+        if i == 1:
+            for key in Data.keys():
+                CombinedData[key] = pd.concat([LastData[key], Data[key]])
+        LastData = Data
+        i = 1
+    return CombinedData, info
+
+
 # Function that uses the previous readin function to acquire the data, and then any further processing to store the variables in a favorable way
 def vector_df(filepath):
-    data, Info = create_df(filepath)
+    if (
+        os.path.isdir(filepath) == True
+    ):  # Detect if there is a directory containing sessions to be combined
+        data, Info = combine_sessions(filepath)
+    if os.path.isdir(filepath) == False:
+        data, Info = create_df(filepath)
     # Acquire individual direction dataframes
     WaterEastVel = data["WaterVelEnu_m_s"].iloc[
         :, 0::4
@@ -55,5 +76,5 @@ def vector_df(filepath):
     ]  # this pulls out the individual ENU and Error columns for each of the 85 cells
     WaterNorthVel = data["WaterVelEnu_m_s"].iloc[:, 1::4]
     WaterErrVel = data["WaterVelEnu_m_s"].iloc[:, 3::4]
-    rawdata = data
+    rawdata = data.copy()
     return rawdata, WaterEastVel, WaterNorthVel, WaterVertVel, WaterErrVel, Info
