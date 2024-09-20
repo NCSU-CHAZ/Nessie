@@ -46,6 +46,12 @@ def cellsize_interp(vel_array, CellSize_m, CellGrid, Interpsize):
 
     # Determine dimensions and unique cell sizes
     varCellSize = np.unique(CellSize_m)
+    if len(varCellSize) == 1:
+        vel_interp = vel_array
+        interpCellDepth = CellGrid[[0], :]
+        print("There is only one unique cell size so there is no interpolation to be done for this object of length",len(vel_array))
+        return vel_interp, interpCellDepth
+
     varCellSize = np.delete(varCellSize, 0)  # Remove  the smallest cell size
     targetCellSize = varCellSize[
         Interpsize - 1
@@ -91,7 +97,7 @@ def Hydro_process(filepath):
     rawdata, WaterEastVel, WaterNorthVel, WaterVertVel, WaterErrVal, Info = vector_df(
         filepath
     )
-
+    
     EastVel = WaterEastVel.subtract(rawdata["BtVelEnu_m_s"].iloc[:, 0], axis=0)
     NorthVel = WaterNorthVel.subtract(rawdata["BtVelEnu_m_s"].iloc[:, 1], axis=0)
     VertVel = WaterVertVel.subtract(rawdata["BtVelEnu_m_s"].iloc[:, 2], axis=0)
@@ -106,7 +112,7 @@ def Hydro_process(filepath):
     CellGrid = np.outer(cellnum, rawdata["CellSize_m"])
     CellGrid = np.add(rawdata["CellStart_m"].to_numpy(), (CellGrid.swapaxes(0, 1)))
     CellGrid = CellGrid + 0.1651
-
+    
     # Map the cell depth by compensating for sever tilt and pitch during measurements.
     # This code will take the angle of the pitch measurements and find the true cell depth each beam is at.
     # For example, if the pitch is -.1 rad (the nose is pointed up) the forward facing beam would be at an angle
@@ -125,12 +131,12 @@ def Hydro_process(filepath):
     # Remove the .75 meters of data at each sample since the data isn't routinely low SnR
     cutoff = 0.75
     mask = CellGrid < cutoff
-    print(mask)
+    
     EastVel[mask] = float("NaN")
     NorthVel[mask] = float("NaN")
     VertVel[mask] = float("NaN")
 
-    # Apply an acceleration mask the nans value of a certain acceleration
+    #Apply an acceleration mask the nans value of a certain acceleration
     # cutoff = .45 #m/s^2
 
     # accelE = rawdata["BtVelEnu_m_s"].iloc[:, 0].diff()
@@ -144,7 +150,7 @@ def Hydro_process(filepath):
     # EastVel[maskE] = float("NaN")
     # NorthVel[maskN] = float("NaN")
     # VertVel[maskV] = float("NaN")
-
+    
     # Add matrices with NaN values together without getting nans from the whole thing
     nan_mask = (np.full(dim, False))
     for i in range(dim[1]):
@@ -154,13 +160,13 @@ def Hydro_process(filepath):
     NorthVel_no_nan = np.nan_to_num(NorthVel, nan=0.0)
     EastVel_no_nan = np.nan_to_num(EastVel, nan=0.0)
     VertVel_no_nan = np.nan_to_num(VertVel, nan=0.0)
-
+    
     # Sum the squared velocities
     AbsVel = np.sqrt(NorthVel_no_nan**2 + EastVel_no_nan**2 + VertVel_no_nan**2)
-
+    
     # Reapply the mask to set positions with any original NaNs back to NaN
     AbsVel[~nan_mask] = np.nan
-
+    
     EastVel_interp, interpCellDepth = cellsize_interp(
         EastVel, rawdata["CellSize_m"], CellGrid, 2
     )
@@ -190,6 +196,9 @@ def Hydro_process(filepath):
         "VbDepth_m": rawdata["VbDepth_m"],
         "SampleNumber" : rawdata['SampleNumber'],
         "Info": Info,
-        "AbsVel": pd.DataFrame(AbsVel)
+        "AbsVel": pd.DataFrame(AbsVel),
+        "Longitude": rawdata['Longitude'],
+        "Latitude": rawdata['Latitude'],
+        "VbDepth": rawdata['VbDepth_m'],
     }
     return Data
