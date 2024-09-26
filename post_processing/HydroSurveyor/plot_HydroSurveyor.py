@@ -6,20 +6,22 @@ import datetime as dt
 import pandas as pd
 
 Data = Hydro_process(
-    r"C:\Users\lwlav\OneDrive\Documents\Summer 2024 CHAZ\Data\file_data.mat"
+    r'C:\Users\lwlav\OneDrive\Documents\Summer 2024 CHAZ\Data\2024_08_30_Surfzone\File'
 )
 
-AutoData = Hydro_session_process(
-    r"C:\Users\lwlav\OneDrive\Documents\Summer 2024 CHAZ\Data\session_data.mat"
-)
+# Session Data
+# AutoData = Hydro_session_process(
+#     r"C:\Users\lwlav\OneDrive\Documents\Summer 2024 CHAZ\Data\session_data.mat"
+# )
 
-LayerData = pd.read_csv(
-    r"C:\Users\lwlav\OneDrive\Documents\Summer 2024 CHAZ\Data\vel_vectors.csv",
-    header=0,
-)
-DateTime = pd.to_datetime(LayerData["utc_time"], format="%Y-%m-%d %H:%M:%S.%f")
-tos = dt.timedelta(hours=4)
-LayerData['DateTime']= DateTime - tos
+# Layer Data
+# LayerData = pd.read_csv(
+#     r"C:\Users\lwlav\OneDrive\Documents\Summer 2024 CHAZ\Data\vel_vectors.csv",
+#     header=0,
+# )
+# DateTime = pd.to_datetime(LayerData["utc_time"], format="%Y-%m-%d %H:%M:%S.%f")
+# tos = dt.timedelta(hours=4)
+# LayerData['DateTime']= DateTime - tos
 
 
 # MatVel,info = create_df(r"C:\Users\lwlav\OneDrive\Documents\Summer 2024 CHAZ\Data\HydroAnalysisExp.mat"); del info
@@ -141,11 +143,11 @@ def layer_data(LayerData):
 
 # raw_comparison_plot(Data)
 
-BT_comparison_plot(Data)
+# BT_comparison_plot(Data)
 
 #auto_manual_comparison(AutoData, Data)
 
-# depth_velocity_plot(Data)
+depth_velocity_plot(Data)
 
 # Snr_plot(AutoData)
 

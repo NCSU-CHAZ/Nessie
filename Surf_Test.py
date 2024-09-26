@@ -3,13 +3,7 @@ import matplotlib.pyplot as plt
 import pandas as pd
 import datetime as dt
 import numpy as np
-
-Data1 = Hydro_process(
-    r"C:\Users\lwlav\OneDrive\Documents\Summer 2024 CHAZ\Data\2024_08_30_Surfzone\File\2024_08_30_SurfzoneFile1.mat"
-)
-Data2 = Hydro_process(
-    r"C:\Users\lwlav\OneDrive\Documents\Summer 2024 CHAZ\Data\2024_08_30_Surfzone\File\2024_08_30_SurfzoneFile2.mat"
-)
+from mpl_toolkits.mplot3d import Axes3D
 
 Data3 = Hydro_process(
     r"C:\Users\lwlav\OneDrive\Documents\Summer 2024 CHAZ\Data\2024_08_30_Surfzone\File\2024_08_30_SurfzoneFile3.mat"
@@ -47,8 +41,9 @@ def adcp_comparison_Abs(Data3, Data4, CombinedData):
     axs[0].plot(
         (CombinedData["DateTime"]),
         (pd.DataFrame(np.nanmean(CombinedData["AbsVel"], axis=1))),
-        label="ADCP Data",
+        label="Combined Data",
     )
+    plt.legend()
     axs[1].plot(
         Data4["DateTime"],
         (pd.DataFrame(np.nanmean(Data4["AbsVel"], axis=1))),
@@ -63,50 +58,62 @@ def adcp_comparison_Abs(Data3, Data4, CombinedData):
         label="Session 3",
         linewidth=lw,
     )
-    plt.title("Absolute Velocities vs Time")
-    plt.xlabel("Time (DD HH:MM)")
-    plt.ylabel("Velocity (m/s)")
+    fig.suptitle("Absolute Velocity versus Time")
+    fig.supxlabel("Time (DD HH:MM)")
+    fig.supylabel("Velocity (m/s)")
     plt.legend()
     plt.show()
 
-
 def bathy_plot(CombinedData):
+    # Sample data: Replace with your actual longitude, latitude, and depth values
+    x = CombinedData['Longitude']  # Longitude
+    y = CombinedData['Latitude']  # Latitude
+    z = CombinedData['VbDepth']     # Depth (negative for bathymetry)
+
+    # Create 3D figure
     fig = plt.figure()
+    ax = fig.add_subplot(111, projection='3d')
+
+    # Plotting options:
+    # 1. Scatter Plot
+    im1 = ax.scatter(x, y, z, c=z, cmap='viridis')  # Color by depth
+    ax.invert_zaxis()
+    cbar = plt.colorbar(im1, ax=ax, shrink=0.5, aspect=5)
+    cbar.set_label('Depth (meters)')
+    # Set labels and title
+    ax.set_xlabel('Longitude')
+    ax.set_ylabel('Latitude')
+    ax.set_zlabel('Depth')
+    plt.title('3D Bathymetry Survey')
+
+    plt.show()
+
+def pitch_roll_comp(CombinedData):
     
-    # syntax for 3-D projection
-    ax = plt.axes(projection ='3d')
-    
-    # defining axes
-    z = CombinedData['VbDepth']
-    x = CombinedData['Latitude']
-    y = CombinedData['Longitude']
-    c = x + y
+    fig, ax = plt.subplots(2, sharex= True)
 
-    ax.scatter(x, y, z, c = c)
-    
-    # syntax for plotting
-    ax.set_title('3d Scatter plot geeks for geeks')
+    ax[0].plot(CombinedData['DateTime'],CombinedData['Pitch'])
+    ax[1].plot(CombinedData['DateTime'],CombinedData['Roll'])
+    ax[0].set_title('Pitch vs Time')
+    ax[1].set_title('Roll vs Time')
+    ax[0].set_ylabel('Pitch (rad)')
+    ax[1].set_ylabel('Roll (rad)')
 
-    # function for z axis
-# def bathy_mesh(COmbinedData):
-#     # x and y axis
-#     Z = CombinedData['VbDepth']
-#     x = CombinedData['Latitude']
-#     y = CombinedData['Longitude']
-    
-#     X, Y = np.meshgrid(x, y)
-    
-    
-#     fig = plt.figure()
-#     ax = plt.axes(projection ='3d')
-#     ax.plot_wireframe(X, Y, Z, color ='green')
-#     ax.set_title('wireframe geeks for geeks')
+    fig.supxlabel("Time (DD HH:MM)")
+    plt.show()
 
-#     plt.show()
+def Vb_Plot(CombinedData):
+    plt.plot(CombinedData['DateTime'],CombinedData['VbDepth'])
+    plt.title('Vertical Beam Depth vs Time')
+    plt.xlabel('Time')
+    plt.ylabel('Depth (m)')
+    plt.show()
 
 
-# adcp_comparison_Abs(Data3,Data4,CombinedData)
+#adcp_comparison_Abs(Data3, Data4, CombinedData)
 
-bathy_plot(CombinedData)
+#bathy_plot(CombinedData)
 
-bathy_mesh(CombinedData)
+#pitch_roll_comp(CombinedData)
+
+#Vb_Plot(CombinedData)
