@@ -5,6 +5,7 @@ import datetime as dt
 from .read_HydroSurveyor import create_df
 from math import floor
 import matplotlib.pyplot as plt
+import pickle as pickle
 
 """ Important Keys in AutoData(There are more)
     ---'HydroSurveyor_WaterVelocityXyz_m_s'
@@ -199,3 +200,4 @@ def Hydro_session_process(filepath):
         ],
     }
     return Data
+
