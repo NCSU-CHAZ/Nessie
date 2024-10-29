@@ -121,6 +121,9 @@ def Vb_Plot(CombinedData):
 
 def variance_inspection(CombinedData):
 
+    #This function is designed to split the velocity field up into the four different directions of travel in order to
+    #analyze the variance dependent on the whether or not the transect was traveling E->W, W->E,N->S,S->N.
+
     NMask = (CombinedData["HeadingRad"] >= 7 * np.pi / 4) | (
         CombinedData["HeadingRad"] < np.pi / 4
     )
@@ -145,19 +148,83 @@ def variance_inspection(CombinedData):
     SouthingVel = CombinedData["AbsVel"].copy()
     WestingVel = CombinedData["AbsVel"].copy()
 
-    NorthingVel[NMask]= float('NaN')
-    EastingVel[EMask]= float('NaN')
-    SouthingVel[SMask]= float('NaN')
-    WestingVel[WMask]= float('NaN')
+    NorthingVel[~NMask]= float('NaN')
+    EastingVel[~EMask]= float('NaN')
+    SouthingVel[~SMask]= float('NaN')
+    WestingVel[~WMask]= float('NaN')
 
-    plt.plot(CombinedData['DateTime'],np.nanmean(NorthingVel,axis=1),label = 'Northing')
+    plt.plot(CombinedData['DateTime'],np.nanmean(NorthingVel,axis=1), label = 'Northing')
     plt.plot(CombinedData['DateTime'],np.nanmean(EastingVel,axis=1), label = 'Easting')
     plt.plot(CombinedData['DateTime'],np.nanmean(SouthingVel,axis=1), label = 'Southing')
     plt.plot(CombinedData['DateTime'],np.nanmean(WestingVel,axis=1), label = 'Westing')
     plt.legend()
     plt.show()
 
+    #After seeing the data field has been split up appropriately, analyze the variance of the data.
 
+    # Northing velocities
+    plt.subplot(2, 2, 1)
+    plt.hist(NorthingVel[~np.isnan(NorthingVel)].values.ravel(),bins=100)
+    plt.title('Northing Velocity Distribution')
+    plt.xlabel('Velocity')
+    plt.ylabel('Samples')
+
+    # Easting velocities
+    plt.subplot(2, 2, 2)
+    plt.hist(EastingVel[~np.isnan(EastingVel)].values.ravel(),bins=100)
+    plt.title('Easting Velocity Distribution')
+    plt.xlabel('Velocity')
+    plt.ylabel('Samples')
+
+    # Southing velocities
+    plt.subplot(2, 2, 3)
+    plt.hist(SouthingVel[~np.isnan(SouthingVel)].values.ravel(),bins=100)
+    plt.title('Southing Velocity Distribution')
+    plt.xlabel('Velocity')
+    plt.ylabel('Samples')
+
+    # Westing velocities
+    plt.subplot(2, 2, 4)
+    plt.hist(WestingVel[~np.isnan(WestingVel)].values.ravel(),bins=100)
+    plt.title('Westing Velocity Distribution')
+    plt.xlabel('Velocity')
+    plt.ylabel('Samples')
+
+    plt.tight_layout()
+    plt.show()
+
+    #Now we can look at the distribution for the average velocities
+
+    # Northing velocities
+    plt.subplot(2, 2, 1)
+    plt.hist(np.nanmean(NorthingVel,axis=1),bins=100)
+    plt.title('Northing Average Velocity Distribution')
+    plt.xlabel('Velocity')
+    plt.ylabel('Samples')
+
+    # Easting velocities
+    plt.subplot(2, 2, 2)
+    plt.hist(np.nanmean(EastingVel,axis=1),bins=100)
+    plt.title('Eastingn Average Velocity Distribution')
+    plt.xlabel('Velocity')
+    plt.ylabel('Samples')
+
+    # Southing velocities
+    plt.subplot(2, 2, 3)
+    plt.hist(np.nanmean(SouthingVel,axis=1),bins=100)
+    plt.title('Southing Average Velocity Distribution')
+    plt.xlabel('Velocity')
+    plt.ylabel('Samples')
+
+    # Westing velocities
+    plt.subplot(2, 2, 4)
+    plt.hist(np.nanmean(WestingVel,axis=1),bins=100)
+    plt.title('Westing Average Velocity Distribution')
+    plt.xlabel('Velocity')
+    plt.ylabel('Samples')
+
+    plt.tight_layout()
+    plt.show()
 # adcp_comparison_Abs(Data3, Data4, CombinedData)
 
 # bathy_plot(CombinedData)
