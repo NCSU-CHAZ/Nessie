@@ -163,35 +163,35 @@ def variance_inspection(CombinedData):
     #After seeing the data field has been split up appropriately, analyze the variance of the data.
 
     # Northing velocities
-    plt.subplot(2, 2, 1)
-    plt.hist(NorthingVel[~np.isnan(NorthingVel)].values.ravel(),bins=100)
-    plt.title('Northing Velocity Distribution')
-    plt.xlabel('Velocity')
-    plt.ylabel('Samples')
+    fig, axs = plt.subplots(2, 2, sharex=True, sharey=True)
+
+# Northing velocities
+    axs[0, 0].hist(NorthingVel[~np.isnan(NorthingVel)].values.ravel(), bins=100)
+    axs[0, 0].set_title('Northing Velocity Distribution')
+    axs[0, 0].set_xlabel('Velocity')
+    axs[0, 0].set_ylabel('Samples')
 
     # Easting velocities
-    plt.subplot(2, 2, 2)
-    plt.hist(EastingVel[~np.isnan(EastingVel)].values.ravel(),bins=100)
-    plt.title('Easting Velocity Distribution')
-    plt.xlabel('Velocity')
-    plt.ylabel('Samples')
+    axs[0, 1].hist(EastingVel[~np.isnan(EastingVel)].values.ravel(), bins=100)
+    axs[0, 1].set_title('Easting Velocity Distribution')
+    axs[0, 1].set_xlabel('Velocity')
+    axs[0, 1].set_ylabel('Samples')
 
     # Southing velocities
-    plt.subplot(2, 2, 3)
-    plt.hist(SouthingVel[~np.isnan(SouthingVel)].values.ravel(),bins=100)
-    plt.title('Southing Velocity Distribution')
-    plt.xlabel('Velocity')
-    plt.ylabel('Samples')
+    axs[1, 0].hist(SouthingVel[~np.isnan(SouthingVel)].values.ravel(), bins=100)
+    axs[1, 0].set_title('Southing Velocity Distribution')
+    axs[1, 0].set_xlabel('Velocity')
+    axs[1, 0].set_ylabel('Samples')
 
     # Westing velocities
-    plt.subplot(2, 2, 4)
-    plt.hist(WestingVel[~np.isnan(WestingVel)].values.ravel(),bins=100)
-    plt.title('Westing Velocity Distribution')
-    plt.xlabel('Velocity')
-    plt.ylabel('Samples')
+    axs[1, 1].hist(WestingVel[~np.isnan(WestingVel)].values.ravel(), bins=100)
+    axs[1, 1].set_title('Westing Velocity Distribution')
+    axs[1, 1].set_xlabel('Velocity')
+    axs[1, 1].set_ylabel('Samples')
 
     plt.tight_layout()
     plt.show()
+
 
     #Now we can look at the distribution for the average velocities
 
