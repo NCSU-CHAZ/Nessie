@@ -63,14 +63,3 @@ def read_Sig1k(filepath):  # Create read function
         # individual array into a dataframe and saving it to it's key
     ADCPData["Config"] = Data["Config"][0, 0]
     return ADCPData
-
-
-# def combine_Sig1k(filepath): # When the software exports data as a .mat file, if the file size is too large it seperates them into
-#                              # individual columns
-#     Data = read_Sig1k(filepath)
-#     N= floor(len(Data['IBurst_EnsembleCount'])/95)
-#     print(Data['IBurst_EnsembleCount'])
-#     for i in range(1,N+1):
-#         whichnum = str(i)
-#         key = f'BurstVelBeam{whichnum}'
-#         return Data
