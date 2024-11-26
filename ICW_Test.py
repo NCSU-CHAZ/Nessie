@@ -7,23 +7,47 @@ from post_processing.HydroSurveyor.read_HydroSurveyor import vector_df
 import pandas as pd
 import datetime as dt
 import numpy as np
+import pickle as pickle 
 
-Data = Hydro_process(
-    r"C:\Users\lwlav\OneDrive\Documents\Summer 2024 CHAZ\Data\file_data.mat"
-)
+#This file is the summary analysis file for the surfzone test, the first few commented lines process and save the data by using
+#functions from other scripts. We are using the pickle module in order to write the data as bytes into a txt file. The rest of the
+#script then loads the data using pickle and generates some plots.
 
-AutoData = Hydro_session_process(
-    r"C:\Users\lwlav\OneDrive\Documents\Summer 2024 CHAZ\Data\session_data.mat"
-)
 
-AdcpData = process(
-    r"C:\Users\lwlav\OneDrive\Documents\Summer 2024 CHAZ\Data\S103080A004_ICW_test.mat"
-)
+# Data = Hydro_process(
+#     r"C:\Users\lwlav\OneDrive\Documents\Summer 2024 CHAZ\Data\file_data.mat"
+# )
 
-LayerData = pd.read_csv(
-    r"C:\Users\lwlav\OneDrive\Documents\Summer 2024 CHAZ\Data\vel_vectors.csv",
-    header=0,
-)
+# AutoData = Hydro_session_process(
+#     r"C:\Users\lwlav\OneDrive\Documents\Summer 2024 CHAZ\Data\session_data.mat"
+# )
+
+# AdcpData = process(
+#     r"C:\Users\lwlav\OneDrive\Documents\Summer 2024 CHAZ\Data\S103080A004_ICW_test.mat"
+# )
+
+# LayerData = pd.read_csv(
+#     r"C:\Users\lwlav\OneDrive\Documents\Summer 2024 CHAZ\Data\vel_vectors.csv",
+#     header=0,
+# )
+# with open(r'C:\Users\lwlav\OneDrive\Documents\Summer 2024 CHAZ\Data\Processed Data\ICWTestFile.txt','wb') as file:
+#     pickle.dump(Data, file)
+# with open(r'C:\Users\lwlav\OneDrive\Documents\Summer 2024 CHAZ\Data\Processed Data\ICWTestSig.txt','wb') as file:
+#     pickle.dump(AdcpData, file)
+# with open(r'C:\Users\lwlav\OneDrive\Documents\Summer 2024 CHAZ\Data\Processed Data\ICWTestLayer.txt','wb') as file:
+#     pickle.dump(LayerData, file)
+# with open(r'C:\Users\lwlav\OneDrive\Documents\Summer 2024 CHAZ\Data\Processed Data\ICWTestSession.txt','wb') as file:
+#     pickle.dump(AutoData, file)
+
+with open(r'C:\Users\lwlav\OneDrive\Documents\Summer 2024 CHAZ\Data\Processed Data\ICWTestFile.txt','rb') as file:
+    Data = pickle.load(file)
+with open(r'C:\Users\lwlav\OneDrive\Documents\Summer 2024 CHAZ\Data\Processed Data\ICWTestSig.txt','rb') as file:
+    AdcpData = pickle.load(file)
+with open(r'C:\Users\lwlav\OneDrive\Documents\Summer 2024 CHAZ\Data\Processed Data\ICWTestLayer.txt','rb') as file:
+    LayerData = pickle.load(file)
+with open(r'C:\Users\lwlav\OneDrive\Documents\Summer 2024 CHAZ\Data\Processed Data\ICWTestSession.txt','rb') as file:
+    AutoData = pickle.load(file)
+
 DateTime = pd.to_datetime(LayerData["utc_time"], format="%Y-%m-%d %H:%M:%S.%f")
 tos = dt.timedelta(hours=4)
 DateTime = DateTime - tos

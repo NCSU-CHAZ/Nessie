@@ -46,6 +46,15 @@ def cellsize_interp(vel_array, CellSize_m, CellGrid, Interpsize):
 
     # Determine dimensions and unique cell sizes
     varCellSize = np.unique(CellSize_m)
+    if len(varCellSize) == 1:
+        vel_interp = vel_array
+        interpCellDepth = CellGrid[[0], :]
+        print(
+            "There is only one unique cell size so there is no interpolation to be done for this object of length",
+            len(vel_array),
+        )
+        return vel_interp, interpCellDepth
+
     varCellSize = np.delete(varCellSize, 0)  # Remove  the smallest cell size
     targetCellSize = varCellSize[
         Interpsize - 1
@@ -96,22 +105,17 @@ def Hydro_process(filepath):
     NorthVel = WaterNorthVel.subtract(rawdata["BtVelEnu_m_s"].iloc[:, 1], axis=0)
     VertVel = WaterVertVel.subtract(rawdata["BtVelEnu_m_s"].iloc[:, 2], axis=0)
     BtVel = rawdata["BtVelEnu_m_s"]
-    
+
     EastVel.reset_index(drop=True, inplace=True)
     NorthVel.reset_index(drop=True, inplace=True)
     VertVel.reset_index(drop=True, inplace=True)
+    rawdata["BtVelEnu_m_s"].reset_index(drop=True, inplace=True)
 
     # Correct for vertical beam ranges
     cellnum = np.arange(0, WaterEastVel.shape[1])
     CellGrid = np.outer(cellnum, rawdata["CellSize_m"])
     CellGrid = np.add(rawdata["CellStart_m"].to_numpy(), (CellGrid.swapaxes(0, 1)))
     CellGrid = CellGrid + 0.1651
-
-    # Map the cell depth by compensating for sever tilt and pitch during measurements.
-    # This code will take the angle of the pitch measurements and find the true cell depth each beam is at.
-    # For example, if the pitch is -.1 rad (the nose is pointed up) the forward facing beam would be at an angle
-    # facing forwards causing each cell to be at an angle and for the cellgrid to not accurately measure the depth of the cell.
-    # The depth would instead be at tan()
 
     # Remove Data below vertical beam range
     dim = WaterEastVel.shape
@@ -122,16 +126,16 @@ def Hydro_process(filepath):
     NorthVel[isbad] = float("NaN")
     VertVel[isbad] = float("NaN")
 
-    # Remove the .75 meters of data at each sample since the data isn't routinely low SnR
-    cutoff = 0.75
-    mask = CellGrid < cutoff
+    # Remove the .75 meters of data at each sample since the data is routinely low SnR
+    # cutoff = 0.75
+    # mask = CellGrid < cutoff
 
-    EastVel[mask] = float("NaN")
-    NorthVel[mask] = float("NaN")
-    VertVel[mask] = float("NaN")
+    # EastVel[mask] = float("NaN")
+    # NorthVel[mask] = float("NaN")
+    # VertVel[mask] = float("NaN")
 
     # Apply an acceleration mask the nans value of a certain acceleration
-    cutoff = .45 #m/s^2
+    cutoff = 0.45  # m/s^2
 
     accelE = rawdata["BtVelEnu_m_s"].iloc[:, 0].diff()
     accelN = rawdata["BtVelEnu_m_s"].iloc[:, 1].diff()
@@ -146,9 +150,13 @@ def Hydro_process(filepath):
     VertVel[maskV] = float("NaN")
 
     # Add matrices with NaN values together without getting nans from the whole thing
-    nan_mask = (np.full(dim, False))
+    nan_mask = np.full(dim, False)
     for i in range(dim[1]):
-        nan_mask[:,i] = np.isfinite(NorthVel.iloc[:,i]) & np.isfinite(EastVel.iloc[:,i]) & np.isfinite(VertVel.iloc[:,i])
+        nan_mask[:, i] = (
+            np.isfinite(NorthVel.iloc[:, i])
+            & np.isfinite(EastVel.iloc[:, i])
+            & np.isfinite(VertVel.iloc[:, i])
+        )
 
     # Replace NaNs with zeroes for the calculation
     NorthVel_no_nan = np.nan_to_num(NorthVel, nan=0.0)
@@ -188,8 +196,15 @@ def Hydro_process(filepath):
         "DateTime": dates,
         "CellSize_m": rawdata["CellSize_m"],
         "VbDepth_m": rawdata["VbDepth_m"],
+        "SampleNumber": rawdata["SampleNumber"],
         "Info": Info,
         "AbsVel": pd.DataFrame(AbsVel),
-        "AccelE": accelE
+        "Longitude": rawdata["Longitude"],
+        "Latitude": rawdata["Latitude"],
+        "VbDepth": rawdata["VbDepth_m"],
+        "Pitch": rawdata["PitchRad"],
+        "Roll": rawdata["RollRad"],
+        "RawNorth": WaterNorthVel,
+        "HeadingRad": rawdata['HeadingRad'],
     }
     return Data
