@@ -2,12 +2,14 @@ from process_Sig1k import process
 import matplotlib.pyplot as plt
 import numpy as np
 import datetime as dt
+import pandas as pd
 
 Data = process(
     r"C:\Users\lwlav\OneDrive\Documents\Summer 2024 CHAZ\Data\S103080A004_ICW_test.mat"
 )
 
-
+with pd.HDFStore(r"C:\Users\lwlav\OneDrive\Documents\Summer 2024 CHAZ\Data\S103080A004_ICW_test.mat") as store:
+    store.put('Data', )
 
 def RawVel_plotter(Data):
 
@@ -91,7 +93,7 @@ def hist_plotter(Data):
 
 # DepthAvg_plotter(Data)
 
-surface_plot(Data)
+# surface_plot(Data)
 
 # hist_plotter(Data)
 

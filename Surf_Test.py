@@ -225,6 +225,63 @@ def variance_inspection(CombinedData):
     plt.tight_layout()
     plt.show()
 
+def basic_error_analysis(data):
+    #The goal of this function is to perform a basic error analysis and look at measurements such as standard error and standard deviation.
+    data = data.values.flatten() #Turn matrix into vector since time and depth coordinates aren't relevant for this analysis
+    data = data[~np.isnan(data)] #Remove all nan values to prevent errors when dealing with them
+    # Flatten the data into a 1D array
+    data = data.values.flatten() if hasattr(data, 'values') else data.flatten()
+    
+    # Remove NaN values
+    data = data[~np.isnan(data)]
+    
+    # Calculate statistics
+    confidence = .95 #Confidence level
+    n = len(data)
+    mean = np.mean(data)
+    std_dev = np.std(data, ddof=1)  # Sample standard deviation (ddof=1)
+    std_error = std_dev / np.sqrt(n)  # Standard error of the mean
+    median = np.median(data)
+    
+    # Calculate the confidence interval
+    t_critical = spy.t.ppf((1 + confidence) / 2, df=n-1)  # t critical value
+    margin_of_error = t_critical * std_error
+    confidence_interval = (mean - margin_of_error, mean + margin_of_error)
+    
+    # Store results in a dictionary
+    results = {
+        "mean": mean,
+        "std_dev": std_dev,
+        "std_error": std_error,
+        "confidence_interval": confidence_interval,
+        "confidence_level": confidence,
+        "median":median
+    }
+    
+    # Print results
+    print(f"Mean: {mean:.4f}")
+    print(f"Standard Deviation: {std_dev:.4f}")
+    print(f"Standard Error: {std_error:.4f}")
+    print(f"{confidence*100:.1f}% Confidence Interval: ({confidence_interval[0]:.4f}, {confidence_interval[1]:.4f})")
+    print(f"Median: {median:.4f}")
+    
+    # Plot histogram of the data
+    plt.hist(data, bins=50, alpha=0.7, color='blue', density=True)
+    plt.title("WestingVel Data Distribution")
+    plt.xlabel("Velocity (m/s)")
+    plt.ylabel("Density")
+    plt.axvline(mean, color='red', linewidth=1, label='Mean')
+    plt.axvline(confidence_interval[0], color='black', linestyle='dashed', linewidth=1, label=f'Lower {confidence*100:.1f}% CI')
+    plt.axvline(confidence_interval[1], color='black', linestyle='dashed', linewidth=1, label=f'Upper {confidence*100:.1f}% CI')
+    plt.axvline(median, color = 'green',label = 'Median')
+    plt.legend()
+    plt.grid(True)
+    plt.show()
+    
+    return results
+
+
+
 def chi_fit(Data, label, bins=100, signifigance = .05):
     # Flatten and remove NaN values
     data_cleaned = Data.values.flatten()  # Flatten the DataFrame
@@ -312,6 +369,9 @@ def get_best_distribution(data):
 
     return best_dist, best_p, params[best_dist]
 
+
+    
+
 # adcp_comparison_Abs(Data3, Data4, CombinedData)
 
 # bathy_plot(CombinedData)
@@ -322,6 +382,9 @@ def get_best_distribution(data):
 
 #variance_inspection(CombinedData)
 
+#basic_error_analysis(WestingVel)
+
 #chi_fit(WestingVel,'Easting', bins=100, signifigance = .05)
 
 #get_best_distribution(EastingVel)
+
