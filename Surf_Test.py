@@ -37,16 +37,16 @@ WMask = (CombinedData["HeadingRad"] >= 5 * np.pi / 4) & (
 CombinedData["HeadingRad"] < 7 * np.pi / 4
 )
   
-dim = CombinedData["AbsVel"].shape
+dim = CombinedData["HorizontalVel"].shape
 NMask = np.tile(NMask, (1, dim[1]))
 EMask = np.tile(EMask, (1, dim[1]))
 SMask = np.tile(SMask, (1, dim[1]))
 WMask = np.tile(WMask, (1, dim[1]))
 
-NorthingVel = CombinedData["AbsVel"].copy()
-EastingVel = CombinedData["AbsVel"].copy()
-SouthingVel = CombinedData["AbsVel"].copy()
-WestingVel = CombinedData["AbsVel"].copy()
+NorthingVel = CombinedData["HorizontalVel"].copy()
+EastingVel = CombinedData["HorizontalVel"].copy()
+SouthingVel = CombinedData["HorizontalVel"].copy()
+WestingVel = CombinedData["HorizontalVel"].copy()
 
 NorthingVel[~NMask]= float('NaN')
 EastingVel[~EMask]= float('NaN')
@@ -167,25 +167,25 @@ def variance_inspection(CombinedData):
     fig, axs = plt.subplots(2, 2, sharex=True, sharey=True)
 
 # Northing velocities
-    axs[0, 0].hist(NorthingVel[~np.isnan(NorthingVel)].values.ravel(), bins=100)
+    axs[0, 0].hist(NorthingVel[~np.isnan(NorthingVel)].ravel(), bins=100)
     axs[0, 0].set_title('Northing Velocity Distribution')
     axs[0, 0].set_xlabel('Velocity')
     axs[0, 0].set_ylabel('Samples')
 
     # Easting velocities
-    axs[0, 1].hist(EastingVel[~np.isnan(EastingVel)].values.ravel(), bins=100)
+    axs[0, 1].hist(EastingVel[~np.isnan(EastingVel)].ravel(), bins=100)
     axs[0, 1].set_title('Easting Velocity Distribution')
     axs[0, 1].set_xlabel('Velocity')
     axs[0, 1].set_ylabel('Samples')
 
     # Southing velocities
-    axs[1, 0].hist(SouthingVel[~np.isnan(SouthingVel)].values.ravel(), bins=100)
+    axs[1, 0].hist(SouthingVel[~np.isnan(SouthingVel)].ravel(), bins=100)
     axs[1, 0].set_title('Southing Velocity Distribution')
     axs[1, 0].set_xlabel('Velocity')
     axs[1, 0].set_ylabel('Samples')
 
     # Westing velocities
-    axs[1, 1].hist(WestingVel[~np.isnan(WestingVel)].values.ravel(), bins=100)
+    axs[1, 1].hist(WestingVel[~np.isnan(WestingVel)].ravel(), bins=100)
     axs[1, 1].set_title('Westing Velocity Distribution')
     axs[1, 1].set_xlabel('Velocity')
     axs[1, 1].set_ylabel('Samples')
@@ -195,32 +195,29 @@ def variance_inspection(CombinedData):
 
 
     # Northing velocities
-    plt.subplot(2, 2, 1)
-    plt.hist(np.nanmean(NorthingVel,axis=1),bins=100)
-    plt.title('Northing Average Velocity Distribution')
-    plt.xlabel('Velocity')
-    plt.ylabel('Samples')
+    fig,axs = plt.subplots(4,sharex=True,sharey=True)
+    axs[0].hist(np.nanmean(NorthingVel,axis=1),bins=100)
+    axs[0].title('Northing Average Velocity Distribution')
+    axs[0].xlabel('Velocity')
+    axs[0].ylabel('Samples')
 
     # Easting velocities
-    plt.subplot(2, 2, 2)
-    plt.hist(np.nanmean(EastingVel,axis=1),bins=100)
-    plt.title('Eastingn Average Velocity Distribution')
-    plt.xlabel('Velocity')
-    plt.ylabel('Samples')
+    axs[1].hist(np.nanmean(EastingVel,axis=1),bins=100)
+    axs[1].title('Eastingn Average Velocity Distribution')
+    axs[1].xlabel('Velocity')
+    axs[1].ylabel('Samples')
 
     # Southing velocities
-    plt.subplot(2, 2, 3)
-    plt.hist(np.nanmean(SouthingVel,axis=1),bins=100)
-    plt.title('Southing Average Velocity Distribution')
-    plt.xlabel('Velocity')
-    plt.ylabel('Samples')
+    axs[2].hist(np.nanmean(SouthingVel,axis=1),bins=100)
+    axs[2].title('Southing Average Velocity Distribution')
+    axs[2].xlabel('Velocity')
+    axs[2].ylabel('Samples')
 
     # Westing velocities
-    plt.subplot(2, 2, 4)
-    plt.hist(np.nanmean(WestingVel,axis=1),bins=100)
-    plt.title('Westing Average Velocity Distribution')
-    plt.xlabel('Velocity')
-    plt.ylabel('Samples')
+    axs[3].hist(np.nanmean(WestingVel,axis=1),bins=100)
+    axs[3].title('Westing Average Velocity Distribution')
+    axs[3].xlabel('Velocity')
+    axs[3].ylabel('Samples')
 
     plt.tight_layout()
     plt.show()
@@ -230,7 +227,6 @@ def basic_error_analysis(data):
     data = data.values.flatten() #Turn matrix into vector since time and depth coordinates aren't relevant for this analysis
     data = data[~np.isnan(data)] #Remove all nan values to prevent errors when dealing with them
     # Flatten the data into a 1D array
-    data = data.values.flatten() if hasattr(data, 'values') else data.flatten()
     
     # Remove NaN values
     data = data[~np.isnan(data)]
@@ -284,7 +280,7 @@ def basic_error_analysis(data):
 
 def chi_fit(Data, label, bins=100, signifigance = .05):
     # Flatten and remove NaN values
-    data_cleaned = Data.values.flatten()  # Flatten the DataFrame
+    data_cleaned = Data.flatten()  # Flatten the DataFrame
     data_cleaned = data_cleaned[~np.isnan(data_cleaned)]
     # Fit to a chi-squared distribution
     df, loc, scale = spy.chi2.fit(data_cleaned)
@@ -347,7 +343,7 @@ def get_best_distribution(data):
     dist_names = ["norm", "exponweib", "weibull_max", "weibull_min", "pareto", "genextreme","chi2"]
     dist_results = []
     params = {}
-    data_cleaned = data.values.flatten()  # Flatten the DataFrame
+    data_cleaned = data.ravel()  # Flatten the DataFrame
     data = data_cleaned[~np.isnan(data_cleaned)]
     for dist_name in dist_names:
         dist = getattr(spy, dist_name)
@@ -369,8 +365,40 @@ def get_best_distribution(data):
 
     return best_dist, best_p, params[best_dist]
 
+def depth_vel_comparison(data):
+    #This data will plot and compare velocity at different depths that have been arbitrarily decided
+    lowmask = data['interpCellDepth'] < 1
+    medmask = (data['interpCellDepth'] > 1 ) & (data['interpCellDepth']< 2) 
+    deepmask = (data['interpCellDepth'] > 2)
 
-    
+    lowmask = np.tile(lowmask.T, (dim[0],1))
+    medmask = np.tile(medmask.T, (dim[0],1))
+    deepmask = np.tile(deepmask.T, (dim[0],1))
+
+    shallowVel = data['HorizontalVel'].copy()
+    medVel = data['HorizontalVel'].copy()
+    deepVel = data['HorizontalVel'].copy()
+
+    print(np.shape(lowmask))
+    print(np.shape(shallowVel))
+
+    shallowVel = np.where(lowmask, data['HorizontalVel'], np.nan)
+    medVel = np.where(medmask, data['HorizontalVel'], np.nan)
+    deepVel = np.where(deepmask, data['HorizontalVel'], np.nan)
+
+    fig, axs = plt.subplots(3, sharex= True, sharey= True)
+
+    axs[0].plot(data["DateTime"], np.nanmean(shallowVel,axis=1), label="Shallow Velocity")
+    axs[1].plot(data["DateTime"], np.nanmean(medVel,axis=1), label="Middle Depth Velocity")
+    axs[2].plot(data["DateTime"], np.nanmean(deepVel,axis=1), label="Deep Velocity")
+
+    for i in range(len(axs)):
+        axs[i].legend()
+    fig.suptitle("DateTimes versus Velocity")
+    fig.supxlabel("Time (DD HH:MM)")
+    fig.supylabel("Velocity (m/s)")
+    fig.tight_layout()
+    plt.show()
 
 # adcp_comparison_Abs(Data3, Data4, CombinedData)
 
@@ -380,11 +408,13 @@ def get_best_distribution(data):
 
 # Vb_Plot(CombinedData)
 
-#variance_inspection(CombinedData)
+variance_inspection(CombinedData)
 
 #basic_error_analysis(WestingVel)
 
-#chi_fit(WestingVel,'Easting', bins=100, signifigance = .05)
+#chi_fit(WestingVel,'Westing', bins=100, signifigance = .05)
 
 #get_best_distribution(EastingVel)
+
+#depth_vel_comparison(CombinedData)
 

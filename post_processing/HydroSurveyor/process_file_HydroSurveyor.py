@@ -165,9 +165,11 @@ def Hydro_process(filepath):
 
     # Sum the squared velocities
     AbsVel = np.sqrt(NorthVel_no_nan**2 + EastVel_no_nan**2 + VertVel_no_nan**2)
+    HorizontalVel = np.sqrt(NorthVel_no_nan**2 + EastVel_no_nan**2)
 
     # Reapply the mask to set positions with any original NaNs back to NaN
     AbsVel[~nan_mask] = np.nan
+    HorizontalVel[~nan_mask] = np.nan
 
     EastVel_interp, interpCellDepth = cellsize_interp(
         EastVel, rawdata["CellSize_m"], CellGrid, 2
@@ -206,5 +208,6 @@ def Hydro_process(filepath):
         "Roll": rawdata["RollRad"],
         "RawNorth": WaterNorthVel,
         "HeadingRad": rawdata['HeadingRad'],
+        "HorizontalVel": HorizontalVel
     }
     return Data
