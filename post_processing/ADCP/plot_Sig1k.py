@@ -5,11 +5,11 @@ import datetime as dt
 import pandas as pd
 
 Data = process(
-    r"C:\Users\lwlav\OneDrive\Documents\Summer 2024 CHAZ\Data\S103080A004_ICW_test.mat"
+    r"Z:\BHBoemData\Raw\S0_103080\S103080A006_NCSU_35.mat"
 )
 
-with pd.HDFStore(r"C:\Users\lwlav\OneDrive\Documents\Summer 2024 CHAZ\Data\S103080A004_ICW_test.mat") as store:
-    store.put('Data', )
+# with pd.HDFStore(r"C:\Users\lwlav\OneDrive\Documents\Summer 2024 CHAZ\Data\S103080A004_ICW_test.mat") as store:
+#     store.put('Data', )
 
 def RawVel_plotter(Data):
 
@@ -89,7 +89,7 @@ def hist_plotter(Data):
     plt.hist(Data["Burst_VelBeam1"][18000:18100])
     plt.show()
 
-# RawVel_plotter(Data)
+RawVel_plotter(Data)
 
 # DepthAvg_plotter(Data)
 

@@ -1,4 +1,4 @@
-from .read_Sig1k import read_Sig1k
+from read_Sig1k import read_Sig1k
 from math import floor
 import datetime as dt
 import numpy as np
@@ -36,18 +36,24 @@ def dtnum_dttime_adcp(
 
 def process(filepath):
     Data = read_Sig1k(filepath)  # Load in file
-
-    Data["IBurst_Time"] = dtnum_dttime_adcp(Data["IBurst_Time"])
     Data["Burst_Time"] = dtnum_dttime_adcp(Data["Burst_Time"])
-    Data["BurstRawAltimeter_Time"] = dtnum_dttime_adcp(Data["BurstRawAltimeter_Time"])
-    Data["Echo1Bin1_1000kHz_Time"] = dtnum_dttime_adcp(Data["Echo1Bin1_1000kHz_Time"])
-    Data["Echo2Bin1_1000kHz_Time"] = dtnum_dttime_adcp(Data["Echo2Bin1_1000kHz_Time"])
+   
+    #Get individual beams 
+    Data['Burst_VelBeam1'] = (Data['Burst_VelBeam'].iloc[:,0::4]).reset_index(drop=True, inplace=True)
+    Data['Burst_VelBeam2'] = (Data['Burst_VelBeam'].iloc[:,1::4]).reset_index(drop=True, inplace=True)
+    Data['Burst_VelBeam3'] = (Data['Burst_VelBeam'].iloc[:,2::4]).reset_index(drop=True, inplace=True)
+    Data['Burst_VelBeam4'] = (Data['Burst_VelBeam'].iloc[:,3::4]).reset_index(drop=True, inplace=True)
+
+    #Get individual beams 
+    Data['Burst_CorBeam1'] = (Data['Burst_CorBeam'].iloc[:,0::4]).reset_index(drop=True, inplace=True)
+    Data['Burst_CorBeam2'] = (Data['Burst_CorBeam'].iloc[:,1::4]).reset_index(drop=True, inplace=True)
+    Data['Burst_CorBeam3'] = (Data['Burst_CorBeam'].iloc[:,2::4]).reset_index(drop=True, inplace=True)
+    Data['Burst_CorBeam4'] = (Data['Burst_CorBeam'].iloc[:,3::4]).reset_index(drop=True, inplace=True)
 
     # Get the dimensions of the matrices
     row, col = Data["Burst_VelBeam1"].to_numpy().shape
 
     # Create cell depth vector
-
     vector = np.arange(1, Data["Burst_NCells"][0][0] + 1)
 
     Data["CellDepth"] = (
