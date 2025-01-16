@@ -147,7 +147,7 @@ def layer_data(LayerData):
 
 #auto_manual_comparison(AutoData, Data)
 
-depth_velocity_plot(Data)
+# depth_velocity_plot(Data)
 
 # Snr_plot(AutoData)
 

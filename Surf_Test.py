@@ -36,7 +36,7 @@ CombinedData["HeadingRad"] < 5 * np.pi / 4
 WMask = (CombinedData["HeadingRad"] >= 5 * np.pi / 4) & (
 CombinedData["HeadingRad"] < 7 * np.pi / 4
 )
-  
+
 dim = CombinedData["HorizontalVel"].shape
 NMask = np.tile(NMask, (1, dim[1]))
 EMask = np.tile(EMask, (1, dim[1]))
@@ -408,7 +408,7 @@ def depth_vel_comparison(data):
 
 # Vb_Plot(CombinedData)
 
-variance_inspection(CombinedData)
+# variance_inspection(CombinedData)
 
 #basic_error_analysis(WestingVel)
 

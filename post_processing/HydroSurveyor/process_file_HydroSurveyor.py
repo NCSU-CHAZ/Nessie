@@ -181,7 +181,23 @@ def Hydro_process(filepath):
         VertVel, rawdata["CellSize_m"], CellGrid, 2
     )
 
+    # Convert datenum to datetume using created function
     dates = dtnum_dttime(rawdata["DateTime"])
+
+    # This portion of the code will rotate the velocites into longshore and crosshore values.
+    # It will leave the vertical data untouched.
+    # The rotation matrices for this will look like
+    # [ cos(theta) sin(theta)   0]
+    # [-sin(theta) cos(theta)   0]
+    # [    0          0         1]
+
+    theta = 15  # Angle of the shorline in degrees N
+    theta_rad = np.deg2rad(theta)
+    LongshoreVel = NorthVel_no_nan*np.cos(theta_rad) + EastVel_no_nan*np.sin(theta_rad)
+    CrossshoreVel = -np.sin(theta_rad)*NorthVel_no_nan + EastVel_no_nan*np.cos(theta_rad)
+
+    LongshoreVel[~nan_mask] = np.nan
+    CrossshoreVel[~nan_mask] = np.nan
 
     Data = {
         "EastVel_interp": EastVel_interp,
@@ -207,7 +223,9 @@ def Hydro_process(filepath):
         "Pitch": rawdata["PitchRad"],
         "Roll": rawdata["RollRad"],
         "RawNorth": WaterNorthVel,
-        "HeadingRad": rawdata['HeadingRad'],
-        "HorizontalVel": HorizontalVel
+        "HeadingRad": rawdata["HeadingRad"],
+        "HorizontalVel": HorizontalVel,
+        "LSVel": LongshoreVel,
+        "CSVel": CrossshoreVel,
     }
     return Data
