@@ -49,4 +49,9 @@ def average_vel_plots(path):
     plt.xlim(left=Time.iloc[1],right=Time.iloc[-1])
     plt.show()
 
-average_vel_plots(path)
+#average_vel_plots(path)
+
+EastVel = pd.read_hdf(os.path.join(path,'EastVel.h5'))
+CellDepth = pd.read_hdf(os.path.join(path,'CellDepth.h5'))
+print(CellDepth)
+print(EastVel.shape)
