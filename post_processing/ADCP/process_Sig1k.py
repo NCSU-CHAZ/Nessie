@@ -230,22 +230,22 @@ def process(path, save_dir):
 
     #Save the data gields
     Data['AbsVel'].to_hdf(
-        os.path.join(save_dir, 'AbsVel'), key="df", mode="w"
+        os.path.join(save_dir, 'AbsVel.h5'), key="df", mode="w"
     )
     Data['Time'].to_hdf(
-        os.path.join(save_dir, 'Time'), key="df", mode="w"
+        os.path.join(save_dir, 'Time.h5'), key="df", mode="w"
     )
     Data['EastVel'].to_hdf(
-        os.path.join(save_dir, 'EastVel'), key="df", mode="w"
+        os.path.join(save_dir, 'EastVel.h5'), key="df", mode="w"
     )
     Data['NorthVel'].to_hdf(
-        os.path.join(save_dir, 'NorthVel'), key="df", mode="w"
+        os.path.join(save_dir, 'NorthVel.h5'), key="df", mode="w"
     )
     Data['VertVel'].to_hdf(
-        os.path.join(save_dir, 'VertVel'), key="df", mode="w"
+        os.path.join(save_dir, 'VertVel.h5'), key="df", mode="w"
     )
     Data['ErrVel'].to_hdf(
-        os.path.join(save_dir, 'ErrVel'), key="df", mode="w"
+        os.path.join(save_dir, 'ErrVel.h5'), key="df", mode="w"
     )
     Data['CellDepth'].to_hdf( os.path.join(save_dir, 'CellDepth'), key="df", mode="w")
     
