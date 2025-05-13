@@ -11,14 +11,14 @@ import scipy.stats as spy
 # script then loads the data using pickle and generates some plots. Some of the plots require other individual data streams to work.
 # To get these other data streams simple run hydroprocess on the raw data for whatever it needs to process.
 
-# CombinedData = Hydro_process(
-#     r"Z:\BHI_NearshoreJetskiSurvey_Data\2024_12_04\SecondExtract\1_M9Hydro.mat"
-# )
-# with open(r"Z:\BHI_NearshoreJetskiSurvey_Data\2024_12_04\SecondExtract\processed.txt",'wb') as file:
-#     pickle.dump(CombinedData, file)
+CombinedData = Hydro_process(
+    r"Z:\BHI_NearshoreJetskiSurvey_Data\2025_05_01\2025_05_01_BHI_unprocessed.mat"
+)
+with open(r"Z:\BHI_NearshoreJetskiSurvey_Data\2025_05_01_processed.txt",'wb') as file:
+    pickle.dump(CombinedData, file)
 
 with open(
-    r"Z:\BHI_NearshoreJetskiSurvey_Data\2024_12_04\SecondExtract\processed.txt",
+    r"Z:\BHI_NearshoreJetskiSurvey_Data\2025_05_01_processed.txt",
     "rb",
 ) as file:
     CombinedData = pickle.load(file)
@@ -72,7 +72,7 @@ def bathy_plot(CombinedData):
     # Plotting options:
     # 1. Scatter Plot
     im1 = ax.scatter(x, y, z, c=z, cmap="viridis")  # Color by depth
-    ax.invert_zaxis()
+    
     cbar = plt.colorbar(im1, ax=ax, shrink=0.5, aspect=5)
     cbar.set_label("Depth (meters)")
     # Set labels and title

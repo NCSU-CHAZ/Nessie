@@ -191,7 +191,8 @@ def Hydro_process(filepath):
     # [-sin(theta) cos(theta)   0]
     # [    0          0         1]
 
-    theta = 15  # Angle of the shorline in degrees N
+    #Shoreline angle for south shore is ~112 degrees and the north shore is 0-9 degrees depending on where you are. 
+    theta = 122  # Angle of the shorline in degrees N
     theta_rad = np.deg2rad(theta)
     LongshoreVel = NorthVel_no_nan*np.cos(theta_rad) + EastVel_no_nan*np.sin(theta_rad)
     CrossshoreVel = -np.sin(theta_rad)*NorthVel_no_nan + EastVel_no_nan*np.cos(theta_rad)

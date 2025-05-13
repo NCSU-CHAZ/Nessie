@@ -1,30 +1,28 @@
 from process_file_HydroSurveyor import Hydro_process
 import matplotlib.pyplot as plt
 import numpy as np
-from process_session_HydroSurveyor import Hydro_session_process
 import datetime as dt
 import pandas as pd
 
+datapath = r"Z:\BHI_NearshoreJetskiSurvey_Data\2025_05_01\2025_05_01_BHI_unprocessed.mat"
+
 Data = Hydro_process(
-    r'C:\Users\lwlav\OneDrive\Documents\Summer 2024 CHAZ\Data\2024_08_30_Surfzone\File'
+    r"Z:\BHI_NearshoreJetskiSurvey_Data\2025_05_01\2025_05_01_BHI_unprocessed.mat"
 )
 
-# Session Data
-# AutoData = Hydro_session_process(
-#     r"C:\Users\lwlav\OneDrive\Documents\Summer 2024 CHAZ\Data\session_data.mat"
-# )
 
-# Layer Data
+# # Layer Data
 # LayerData = pd.read_csv(
 #     r"C:\Users\lwlav\OneDrive\Documents\Summer 2024 CHAZ\Data\vel_vectors.csv",
 #     header=0,
 # )
+
 # DateTime = pd.to_datetime(LayerData["utc_time"], format="%Y-%m-%d %H:%M:%S.%f")
 # tos = dt.timedelta(hours=4)
 # LayerData['DateTime']= DateTime - tos
 
 
-# MatVel,info = create_df(r"C:\Users\lwlav\OneDrive\Documents\Summer 2024 CHAZ\Data\HydroAnalysisExp.mat"); del info
+#MatVel,info = create_df(r"C:\Users\lwlav\OneDrive\Documents\Summer 2024 CHAZ\Data\HydroAnalysisExp.mat"); del info
 
 
 def raw_comparison_plot(Data):
@@ -141,14 +139,14 @@ def layer_data(LayerData):
     plt.legend()
     plt.show()
 
-# raw_comparison_plot(Data)
+raw_comparison_plot(Data)
 
 # BT_comparison_plot(Data)
 
-#auto_manual_comparison(AutoData, Data)
+# auto_manual_comparison(AutoData, Data)
 
-# depth_velocity_plot(Data)
+depth_velocity_plot(Data)
 
 # Snr_plot(AutoData)
 
-#layer_data(LayerData)
+# layer_data(LayerData)
