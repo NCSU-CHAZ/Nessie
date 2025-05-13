@@ -11,11 +11,11 @@ import scipy.stats as spy
 # script then loads the data using pickle and generates some plots. Some of the plots require other individual data streams to work.
 # To get these other data streams simple run hydroprocess on the raw data for whatever it needs to process.
 
-CombinedData = Hydro_process(
-    r"Z:\BHI_NearshoreJetskiSurvey_Data\2025_05_01\2025_05_01_BHI_unprocessed.mat"
-)
-with open(r"Z:\BHI_NearshoreJetskiSurvey_Data\2025_05_01_processed.txt",'wb') as file:
-    pickle.dump(CombinedData, file)
+# CombinedData = Hydro_process(
+#     r"Z:\BHI_NearshoreJetskiSurvey_Data\2025_05_01\2025_05_01_BHI_unprocessed.mat"
+# )
+# with open(r"Z:\BHI_NearshoreJetskiSurvey_Data\2025_05_01_processed.txt",'wb') as file:
+#     pickle.dump(CombinedData, file)
 
 with open(
     r"Z:\BHI_NearshoreJetskiSurvey_Data\2025_05_01_processed.txt",
@@ -71,14 +71,14 @@ def bathy_plot(CombinedData):
 
     # Plotting options:
     # 1. Scatter Plot
-    im1 = ax.scatter(x, y, z, c=z, cmap="viridis")  # Color by depth
-    
+    im1 = ax.scatter(x, y, z, c=z, cmap="viridis_r")  # Color by depth
     cbar = plt.colorbar(im1, ax=ax, shrink=0.5, aspect=5)
     cbar.set_label("Depth (meters)")
     # Set labels and title
     ax.set_xlabel("Longitude")
     ax.set_ylabel("Latitude")
     ax.set_zlabel("Depth")
+    # ax.invert_zaxis()
     plt.title("3D Bathymetry Survey")
 
     plt.show()
