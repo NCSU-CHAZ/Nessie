@@ -83,6 +83,26 @@ def bathy_plot(CombinedData):
 
     plt.show()
 
-adcp_comparison_Abs(CombinedData)
+def mesh_plot(CombinedData):
+    x = CombinedData("Longitude")
+    y = CombinedData("Latitude")
+    X, Y = np.meshgrid(x,y)
+    Z = CombinedData["VbDepth"]
 
-bathy_plot(CombinedData)
+    fig = plt.figure()
+    ax = fig.add_subplot(111, projection='3d')
+    ax.plot_mesh(X,Y,Z)
+
+    ax.set_xlabel('X')
+    ax.set_ylabel('Y')
+    ax.set_zlabel('Z')
+    ax.set_title('Mesh Plot')
+    ax.view_init(30, 45)
+
+    plt.show()
+
+# adcp_comparison_Abs(CombinedData)
+
+# bathy_plot(CombinedData)
+
+mesh_plot(CombinedData)
