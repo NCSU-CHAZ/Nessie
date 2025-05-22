@@ -2,6 +2,7 @@ from scipy.io import loadmat
 import pandas as pd
 import os
 
+
 # Import .mat files
 def create_df(filepath):
     rawdata = loadmat(
@@ -68,13 +69,26 @@ def vector_df(filepath):
     if os.path.isdir(filepath) == False:
         data, Info = create_df(filepath)
     # Acquire individual direction dataframes
+    number_vertical_cells = int(
+        data["WaterVelEnu_m_s"].shape[1] / 4
+    )  # Get the number of vertical cells by dividing the number of clumns by number of beams
     WaterEastVel = data["WaterVelEnu_m_s"].iloc[
         :, 0::4
-    ]  # 3557x340 matrix gets sorted for every fourth column,
+    ].copy()  # 3557x340 matrix gets sorted for every fourth column,
+    WaterEastVel.columns = range(WaterEastVel.columns.size)
     WaterVertVel = data["WaterVelEnu_m_s"].iloc[
+        :, 3::4
+    ].copy()
+    WaterVertVel.columns = range(WaterVertVel.columns.size)
+    # this pulls out the individual ENU and Error columns for each of the 85 cells
+    WaterNorthVel = data["WaterVelEnu_m_s"].iloc[
         :, 2::4
-    ]  # this pulls out the individual ENU and Error columns for each of the 85 cells
-    WaterNorthVel = data["WaterVelEnu_m_s"].iloc[:, 1::4]
-    WaterErrVel = data["WaterVelEnu_m_s"].iloc[:, 3::4]
+    ].copy()
+    WaterNorthVel.columns = range(WaterNorthVel.columns.size)
+    WaterErrVel = data["WaterVelEnu_m_s"].iloc[
+        :, 3::4
+    ].copy()
+    WaterErrVel.columns = range(WaterErrVel.columns.size)
+    WaterEastVel.reset_index(drop=True, inplace=True)
     rawdata = data.copy()
     return rawdata, WaterEastVel, WaterNorthVel, WaterVertVel, WaterErrVel, Info

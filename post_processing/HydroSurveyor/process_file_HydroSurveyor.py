@@ -181,6 +181,12 @@ def Hydro_process(filepath):
         VertVel, rawdata["CellSize_m"], CellGrid, 2
     )
 
+    #Now remove the data under the the ground for the interpolated data, we need a new grid based on the interp cell depth.
+    isbad = interpCellDepth > mask
+    EastVel_interp[isbad] = float("NaN")
+    NorthVel_interp[isbad] = float("NaN")
+    VertVel_interp[isbad] = float("NaN")
+
     # Convert datenum to datetume using created function
     dates = dtnum_dttime(rawdata["DateTime"])
 
