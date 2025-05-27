@@ -96,7 +96,7 @@ def cellsize_interp(vel_array, CellSize_m, CellGrid, Interpsize):
 
 
 # Main post_processing function
-def Hydro_process(filepath):
+def Hydro_process(filepath, interpsize):
     rawdata, WaterEastVel, WaterNorthVel, WaterVertVel, WaterErrVal, Info = vector_df(
         filepath
     )
@@ -172,13 +172,13 @@ def Hydro_process(filepath):
     HorizontalVel[~nan_mask] = np.nan
 
     EastVel_interp, interpCellDepth = cellsize_interp(
-        EastVel, rawdata["CellSize_m"], CellGrid, 2
+        EastVel, rawdata["CellSize_m"], CellGrid, interpsize
     )
     NorthVel_interp, interpCellDepth = cellsize_interp(
-        NorthVel, rawdata["CellSize_m"], CellGrid, 2
+        NorthVel, rawdata["CellSize_m"], CellGrid, interpsize
     )
     VertVel_interp, interpCellDepth = cellsize_interp(
-        VertVel, rawdata["CellSize_m"], CellGrid, 2
+        VertVel, rawdata["CellSize_m"], CellGrid, interpsize
     )
 
     #Now remove the data under the the ground for the interpolated data, we need a new grid based on the interp cell depth.
@@ -198,13 +198,20 @@ def Hydro_process(filepath):
     # [    0          0         1]
 
     #Shoreline angle for south shore is ~112 degrees and the north shore is 0-9 degrees depending on where you are. 
-    theta = 122  # Angle of the shorline in degrees N
+    theta = 112  # Angle of the shorline in degrees N
     theta_rad = np.deg2rad(theta)
     LongshoreVel = NorthVel_no_nan*np.cos(theta_rad) + EastVel_no_nan*np.sin(theta_rad)
     CrossshoreVel = -np.sin(theta_rad)*NorthVel_no_nan + EastVel_no_nan*np.cos(theta_rad)
 
     LongshoreVel[~nan_mask] = np.nan
     CrossshoreVel[~nan_mask] = np.nan
+
+    LongshoreVel_interp, interpCellDepth = cellsize_interp(
+        LongshoreVel, rawdata["CellSize_m"], CellGrid, interpsize
+    )
+    CrossshoreVel_interp, interpCellDepth = cellsize_interp(
+        CrossshoreVel, rawdata["CellSize_m"], CellGrid, interpsize
+    )
 
     Data = {
         "EastVel_interp": EastVel_interp,
@@ -234,5 +241,7 @@ def Hydro_process(filepath):
         "HorizontalVel": HorizontalVel,
         "LSVel": LongshoreVel,
         "CSVel": CrossshoreVel,
+        "LSVel_interp": LongshoreVel_interp,
+        "CSVel_interp": CrossshoreVel_interp,
     }
     return Data

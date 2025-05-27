@@ -6,23 +6,26 @@ from mpl_toolkits.mplot3d import Axes3D
 import pickle as pickle
 from scipy.stats import binned_statistic_2d
 import matplotlib.dates as mdates
+from datetime import datetime, timedelta
 
 # This file is the summary analysis file for the surfzone test, the first few commented lines process and save the data by using
 # functions from other scripts. We are using the pickle module in order to write the data as bytes into a txt file. The rest of the
 # script then loads the data using pickle and generates some plots. Some of the plots require other individual data streams to work.
 # To get these other data streams simple run hydroprocess on the raw data for whatever it needs to process.
 
-CombinedData = Hydro_process(
-    r"Z:\BHI_NearshoreJetskiSurvey_Data\2025_05_01\2025_05_01_BHI_unprocessed.mat"
-)
-with open(r"Z:\BHI_NearshoreJetskiSurvey_Data\2025_05_01_processed.txt",'wb') as file:
-    pickle.dump(CombinedData, file)
+interpsize = 2 #This would be .05m for the interpolated cell size
 
-with open(
-    r"Z:\BHI_NearshoreJetskiSurvey_Data\2025_05_01_processed.txt",
-    "rb",
-) as file:
-    CombinedData = pickle.load(file)
+CombinedData = Hydro_process(
+    r"Z:\BHI_NearshoreJetskiSurvey_Data\2025_05_01\2025_05_01_BHI_unprocessed.mat", interpsize
+)
+# with open(r"Z:\BHI_NearshoreJetskiSurvey_Data\2025_05_01\2025_05_01_processed.txt",'wb') as file:
+#     pickle.dump(CombinedData, file)
+
+# with open(
+#     r"Z:\BHI_NearshoreJetskiSurvey_Data\2025_05_01\2025_05_01_processed.txt",
+#     "rb",
+# ) as file:
+#     CombinedData = pickle.load(file)
 
 #Plot Longshore, Crosshore, and Vertical Components
 
@@ -42,7 +45,7 @@ def adcp_comparison_Abs(CombinedData):
         CombinedData["DateTime"],
         (pd.DataFrame(np.nanmean(CombinedData["CSVel"], axis=1))),
         color="Red",
-        label="Cross-Shore",
+        label="Cross Shore",
         linewidth=lw,
     )
     axs[1].legend()
@@ -53,6 +56,11 @@ def adcp_comparison_Abs(CombinedData):
         label="Vertical",
         linewidth=lw,
     )
+
+    axs[0].set_ylim(-1.5,1.5)
+    axs[1].set_ylim(-1.5,1.5)
+    axs[2].set_ylim(-1.5,1.5)
+
     fig.suptitle("Velocity Components versus Time")
     fig.supxlabel("Time (DD HH:MM)")
     fig.supylabel("Velocity (m/s)")
@@ -119,34 +127,33 @@ def depth_velocity_plot(Data):
     im1 = axs[0].pcolormesh(
         Data["DateTime"],
         Data["interpCellDepth"],
-        Data["EastVel_interp"].T,
-        vmin=np.nanmin(Data["EastVel_interp"]),
-        vmax=np.nanmax(Data["EastVel_interp"]),
+        Data["LSVel_interp"].T,
         shading="auto",
     )
     im2 = axs[1].pcolormesh(
         Data["DateTime"],
         Data["interpCellDepth"],
-        Data["NorthVel_interp"].T,
-        vmin=np.nanmin(Data["NorthVel_interp"]),
-        vmax=np.nanmax(Data["NorthVel_interp"]),
+        Data["CSVel_interp"].T,
         shading="auto",
     )
     im3 = axs[2].pcolormesh(
         Data["DateTime"],
         Data["interpCellDepth"],
         Data["VertVel_interp"].T,
-        vmin=np.nanmin(Data["VertVel_interp"]),
-        vmax=np.nanmax(Data["VertVel_interp"]),
         shading="auto",
     )
     axs[0].plot(Data["DateTime"], Data["VbDepth_m"])
     axs[1].plot(Data["DateTime"], Data["VbDepth_m"])
     axs[2].plot(Data["DateTime"], Data["VbDepth_m"])
 
-    axs[0].set_title("Easting Velocity")
-    axs[1].set_title("Northing Velocity")
+    axs[0].set_title("Longshore Velocity")
+    axs[1].set_title("Cross Shore Velocity")
     axs[2].set_title("Vertical Velocity")
+
+    axs[0].set_ylim(0,np.max(Data["VbDepth_m"]))
+    axs[1].set_ylim(0,np.max(Data["VbDepth_m"]))
+    axs[2].set_ylim(0,np.max(Data["VbDepth_m"]))
+
     cb1 = fig.colorbar(im1, ax=axs[0])
     cb2 = fig.colorbar(im2, ax=axs[1])
     cb3 = fig.colorbar(im3, ax=axs[2])
@@ -156,11 +163,62 @@ def depth_velocity_plot(Data):
     fig.tight_layout()
     fig.supxlabel("DateTime (DD HH:MM)")
     fig.supylabel("Depth (m)")
+    
     plt.show()
 
+def vel_plot_no_interp(Data):
+     #This plotter will create a similar graph as the last one however it will not use the interpolated cell size,
+     #to do this it will give pcolor mesh the edges of the bins it has velocity data for in both time and depth space.
+     DateTime =  Data["DateTime"]
+     CS =  Data['CSVel']
+     LS =  Data['LSVel']
+     Depths = Data['CellGrid']
+     dim = np.shape(Data['CSVel'])
+     
+     time_deltas = np.diff(DateTime).astype('timedelta64[ns]')
+     dt = np.median(time_deltas)
+
+     #Time edges
+     time_edges = []
+     for i in range(dim[0]-1):
+         middle = DateTime[i] + +(DateTime[i+1]-DateTime[i])/2
+         time_edges.append(middle)
+     
+     #Add in first and last edges
+     time_edges = [DateTime[0] - (DateTime[1]-DateTime[0])/2] + time_edges + [DateTime[-1] - (DateTime[-1]-DateTime[-2])/2]
+     time_edges = np.array(time_edges)
+     fig, ax = plt.subplots(figsize = (12,6))
+     for i in range(dim[0]):
+        #Depth edges
+        row = Depths[i]
+        row_edges = np.zeros((dim[1]+1))
+        row_edges[1:-1] = (row[:-1] + row[1:])/2
+        row_edges[0] = row[0] - (row[0] - row[1])/2
+        row_edges[-1] = row[-1] + (row[-1] - row[-2])/2
+        
+        # Time edges for this row
+        t0 = time_edges[i]
+        t1 = time_edges[i + 1]
+        t_edges = [t0, t1]
+
+        #Create meshgrids that pcolormesh can use
+        T,D = np.meshgrid(t_edges, row_edges, indexing='ij')
+        
+        #Plot
+        pcm = ax.pcolormesh(T,D,LS[i][np.newaxis, :], shading='auto',cmap='viridis')
+
+     ax.set_xlabel('Time')
+     ax.set_ylabel('Depth (m)')
+     ax.set_title('Velocity over Time and Depth')
+     ax.xaxis.set_major_formatter(mdates.DateFormatter('%Y-%m-%d\n%H:%M'))
+     ax.set_ylim(0,10)
+     fig.autofmt_xdate()
+     plt.colorbar(ax.collections[0], ax=ax, label='Velocity (m/s)')
+    
+     plt.show()
 
 
-# adcp_comparison_Abs(CombinedData)
+adcp_comparison_Abs(CombinedData)
 
 # bathy_plot(CombinedData)
 
@@ -168,4 +226,4 @@ def depth_velocity_plot(Data):
 
 # depth_velocity_plot(CombinedData)
 
-print(CombinedData['EastVel_interp'])
+#vel_plot_no_interp(CombinedData)

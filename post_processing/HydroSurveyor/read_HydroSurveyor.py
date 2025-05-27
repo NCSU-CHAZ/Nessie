@@ -77,12 +77,12 @@ def vector_df(filepath):
     ].copy()  # 3557x340 matrix gets sorted for every fourth column,
     WaterEastVel.columns = range(WaterEastVel.columns.size)
     WaterVertVel = data["WaterVelEnu_m_s"].iloc[
-        :, 3::4
+        :, 2::4
     ].copy()
     WaterVertVel.columns = range(WaterVertVel.columns.size)
     # this pulls out the individual ENU and Error columns for each of the 85 cells
     WaterNorthVel = data["WaterVelEnu_m_s"].iloc[
-        :, 2::4
+        :, 1::4
     ].copy()
     WaterNorthVel.columns = range(WaterNorthVel.columns.size)
     WaterErrVel = data["WaterVelEnu_m_s"].iloc[
