@@ -96,7 +96,7 @@ def cellsize_interp(vel_array, CellSize_m, CellGrid, Interpsize):
 
 
 # Main post_processing function
-def Hydro_process(filepath, interpsize):
+def Hydro_process(filepath, interpsize, shoreline_orientation):
     rawdata, WaterEastVel, WaterNorthVel, WaterVertVel, WaterErrVal, Info = vector_df(
         filepath
     )
@@ -198,7 +198,7 @@ def Hydro_process(filepath, interpsize):
     # [    0          0         1]
 
     #Shoreline angle for south shore is ~112 degrees and the north shore is 0-9 degrees depending on where you are. 
-    theta = 112  # Angle of the shorline in degrees N
+    theta = shoreline_orientation # Angle of the shorline in degrees N
     theta_rad = np.deg2rad(theta)
     LongshoreVel = NorthVel_no_nan*np.cos(theta_rad) + EastVel_no_nan*np.sin(theta_rad)
     CrossshoreVel = -np.sin(theta_rad)*NorthVel_no_nan + EastVel_no_nan*np.cos(theta_rad)
