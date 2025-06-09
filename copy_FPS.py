@@ -75,9 +75,9 @@ def adcp_comparison_Abs(CombinedData):
     axs[2].legend()
     plt.show()
 
-Longitude = 
-Latitude = 
-VbDepth = 
+Longitude = -77
+Latitude = 34
+VbDepth = 3
 def bathy_plot(CombinedData):
     # Sample data: Replace with your actual longitude, latitude, and depth values
     x = CombinedData[Longitude]  # Longitude
