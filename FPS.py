@@ -18,16 +18,16 @@ from rasterio.transform import rowcol
 interpsize = 2  # This would be .05m for the interpolated cell size
 
 # CombinedData = Hydro_process(
-#     r"Z:\BHI_NearshoreJetskiSurvey_Data\2025_05_01\2025_05_01_BHI_unprocessed.mat",
-#     interpsize,
+#     r"Z:\BHI_NearshoreJetskiSurvey_Data\2024_12_04\SecondExtract\1_M9Hydro.mat",
+#     interpsize, 115
 # )
 # with open(
-#     r"Z:\BHI_NearshoreJetskiSurvey_Data\2025_05_01\2025_05_01_processed.txt", "wb"
+#     r"Z:\BHI_NearshoreJetskiSurvey_Data\2024_12_04\2024_12_04_processed.txt", "wb"
 # ) as file:
 #     pickle.dump(CombinedData, file)
 
 with open(
-    r"Z:\BHI_NearshoreJetskiSurvey_Data\2025_05_01\2025_05_01_processed.txt",
+    r"Z:\BHI_NearshoreJetskiSurvey_Data\2024_12_04\2024_12_04_processed.txt",
     "rb",
 ) as file:
     CombinedData = pickle.load(file)
@@ -67,7 +67,7 @@ def adcp_comparison_Abs(CombinedData):
     axs[1].set_ylim(-1.5, 1.5)
     axs[2].set_ylim(-1.5, 1.5)
 
-    fig.suptitle("Velocity Components versus Time")
+    fig.suptitle("Velocity Components versus Time for 12/04")
     fig.supxlabel("Time (DD HH:MM)")
     fig.supylabel("Velocity (m/s)")
     plt.xlim(CombinedData["DateTime"][0], CombinedData["DateTime"][-1])
@@ -95,8 +95,8 @@ def bathy_plot(CombinedData):
     ax.set_xlabel("Longitude")
     ax.set_ylabel("Latitude")
     ax.set_zlabel("Depth")
-    # ax.invert_zaxis()
-    plt.title("3D Bathymetry Survey")
+    ax.invert_zaxis()
+    plt.title("3D Bathymetry Survey for 12/04")
 
     plt.show()
 
@@ -125,7 +125,7 @@ def mesh_plot(CombinedData):
     ax.set_ylabel("Latitude")
     ax.set_zlabel("Depth")
     ax.invert_zaxis()
-    ax.set_title("Interpolated Bathymetry Mesh Plot")
+    ax.set_title("Interpolated Bathymetry Mesh Plot for 12/04")
     plt.show()
 
 
@@ -222,7 +222,7 @@ def vel_plot_no_interp(Data):
 
     ax.set_xlabel("Time")
     ax.set_ylabel("Depth (m)")
-    ax.set_title("Velocity over Time and Depth")
+    ax.set_title("Velocity over Time and Depth for 12/04")
     ax.xaxis.set_major_formatter(mdates.DateFormatter("%Y-%m-%d\n%H:%M"))
     ax.set_ylim(0, 10)
     fig.autofmt_xdate()
@@ -263,30 +263,6 @@ def geoplot(Data, bin_number):
         figsize=(10, 10), subplot_kw={"projection": ccrs.PlateCarree()}
     )
 
-    # Assume land is brighter (you may need to experiment or use a specific band)
-    # grayscale = img8[0]  # Use one band (e.g., red), or average for intensity
-    # threshold = 100  # Tune this value!
-    # land_mask = grayscale > threshold  # True = land, False = water
-
-    # # Convert lat/lon mesh to raster row/col
-    # rows, cols = rowcol(src.transform, lon, lat)
-
-    # # Make sure indices are valid
-    # valid_mask = (rows >= 0) & (rows < src.height) & (cols >= 0) & (cols < src.width)
-
-    # # Initialize mask as all True (masked)
-    # plot_mask = np.full(lon.shape, False)
-
-    # # Apply mask only to valid raster coordinates
-    # for i in range(lon.shape[0]):
-    #     for j in range(lon.shape[1]):
-    #         if valid_mask[i, j]:
-    #             plot_mask[i, j] = not land_mask[rows[i, j], cols[i, j]]
-
-    # # Apply the mask
-    # Easting_masked = np.where(plot_mask, Easting, np.nan)
-    # Northing_masked = np.where(plot_mask, Northing, np.nan)
-
     # Show image with correct extent
     extent = src.bounds  # left, bottom, right, top
     ax.imshow(
@@ -302,30 +278,30 @@ def geoplot(Data, bin_number):
     #This shows the path
     # ax.scatter(lon,lat)
 
-    # This shows the velocity vectors
-    # q = ax.quiver(
-    #     lon,
-    #     lat,
-    #     Easting,
-    #     Northing,
-    #     speed,
-    #     transform=ccrs.PlateCarree(),
-    #     cmap="plasma",
-    #     scale=8,
-    # )
-    # cb = plt.colorbar(q, orientation="vertical", label="Speed (m/s)")
+    #This shows the velocity vectors
+    q = ax.quiver(
+        lon,
+        lat,
+        Easting,
+        Northing,
+        speed,
+        transform=ccrs.PlateCarree(),
+        cmap="plasma",
+        scale=8,
+    )
+    cb = plt.colorbar(q, orientation="vertical", label="Speed (m/s)")
 
     ax.set_xlabel("Longitude")
     ax.set_ylabel("Latitude")
-    plt.title("Velocity Vectors for BHI Data Collection on 5/1/25")
+    plt.title("Velocity Vectors for BHI Data Collection on 5/1/25 for 12/04")
     plt.show()
 
 
-# adcp_comparison_Abs(CombinedData)
+adcp_comparison_Abs(CombinedData)
 
 # bathy_plot(CombinedData)
 
-# mesh_plot(CombinedData)
+mesh_plot(CombinedData)
 
 # depth_velocity_plot(CombinedData)
 
