@@ -15,20 +15,17 @@ from rasterio.transform import rowcol
 # script then loads the data using pickle and generates some plots. Some of the plots require other individual data streams to work.
 # To get these other data streams simple run hydroprocess on the raw data for whatever it needs to process.
 
+filepath = r"D:\Research\Hydro-JFE\Hydro_March\1_M9Hydro_Corrected.mat"
 interpsize = 2  # This would be .05m for the interpolated cell size
+shoreline_orientation = 112
 
-# CombinedData = Hydro_process(
-#     r"Z:\BHI_NearshoreJetskiSurvey_Data\2025_05_01\2025_05_01_BHI_unprocessed.mat",
-#     interpsize,
-# )
+Data = Hydro_process(filepath, interpsize, shoreline_orientation)
 # with open(
 #     r"Z:\BHI_NearshoreJetskiSurvey_Data\2025_05_01\2025_05_01_processed.txt", "wb"
 # ) as file:
 #     pickle.dump(CombinedData, file)
 
-with open(
-    r"Z:\BHI_NearshoreJetskiSurvey_Data\2025_05_01\2025_05_01_processed.txt",
-    "rb",
+with open(Data, "rb",
 ) as file:
     CombinedData = pickle.load(file)
 
@@ -75,12 +72,14 @@ def adcp_comparison_Abs(CombinedData):
     axs[2].legend()
     plt.show()
 
-
+Longitude = -77
+Latitude = 34
+VbDepth = 3
 def bathy_plot(CombinedData):
     # Sample data: Replace with your actual longitude, latitude, and depth values
-    x = CombinedData["Longitude"]  # Longitude
-    y = CombinedData["Latitude"]  # Latitude
-    z = CombinedData["VbDepth"]  # Depth (negative for bathymetry)
+    x = CombinedData[Longitude]  # Longitude
+    y = CombinedData[Latitude]  # Latitude
+    z = CombinedData[VbDepth]  # Depth (negative for bathymetry)
 
     # Create 3D figure
     fig = plt.figure()
