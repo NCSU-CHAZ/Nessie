@@ -15,7 +15,7 @@ from rasterio.transform import rowcol
 # script then loads the data using pickle and generates some plots. Some of the plots require other individual data streams to work.
 # To get these other data streams simple run hydroprocess on the raw data for whatever it needs to process.
 
-filepath = r"D:\Research\Hydro-JFE\Hydro_March\1_M9Hydro_Corrected.mat"
+filepath = r"files/1_M9Hydro_Corrected.mat"
 interpsize = 2  # This would be .05m for the interpolated cell size
 shoreline_orientation = 112
 
@@ -23,13 +23,12 @@ CombinedData = Hydro_process(
     filepath, interpsize, shoreline_orientation
  )
 with open(
-    r"D:\Research\Hydro-JFE\Hydro_March\1_M9Hydro_Corrected_processed.txt", "wb"
+    r"files/1_M9Hydro_Corrected_processed.txt", "wb"
  ) as file:
     pickle.dump(CombinedData, file)
 
 with open(
-    r"D:\Research\Hydro-JFE\Hydro_March\1_M9Hydro_Corrected_processed.txt",
-    "rb"
+    r"files/1_M9Hydro_Corrected_processed.txt", "rb"
 ) as file:
     CombinedData = pickle.load(file)
 
