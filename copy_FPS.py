@@ -19,13 +19,17 @@ filepath = r"D:\Research\Hydro-JFE\Hydro_March\1_M9Hydro_Corrected.mat"
 interpsize = 2  # This would be .05m for the interpolated cell size
 shoreline_orientation = 112
 
-Data = Hydro_process(filepath, interpsize, shoreline_orientation)
-# with open(
-#     r"Z:\BHI_NearshoreJetskiSurvey_Data\2025_05_01\2025_05_01_processed.txt", "wb"
-# ) as file:
-#     pickle.dump(CombinedData, file)
+CombinedData = Hydro_process(
+    filepath, interpsize, shoreline_orientation
+ )
+with open(
+    r"D:\Research\Hydro-JFE\Hydro_March\1_M9Hydro_Corrected_processed.txt", "wb"
+ ) as file:
+    pickle.dump(CombinedData, file)
 
-with open(Data, "rb",
+with open(
+    r"D:\Research\Hydro-JFE\Hydro_March\1_M9Hydro_Corrected_processed.txt",
+    "rb"
 ) as file:
     CombinedData = pickle.load(file)
 
