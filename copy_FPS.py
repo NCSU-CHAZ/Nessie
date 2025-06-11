@@ -233,11 +233,11 @@ def vel_plot_no_interp(Data):
 
     plt.show()
 
-
+MapImage = r"D:\Research\Hydro-JFE\1_M9Hydro_Corrected2025-03-25_Sentinel-2.tiff"
 def geoplot(Data, bin_number):
     # Open TIFF with rasterio
     src = rasterio.open(
-        r"Z:\BHI_NearshoreJetskiSurvey_Data\2025_05_01\2025_04_29_Sentinel-2_BH_Sattelite.tiff"
+        r"D:\Research\Hydro-JFE\1_M9Hydro_Corrected2025-03-25_Sentinel-2.tiff"
     )
     img16 = src.read()
     img8 = ((img16 - np.min(img16)) / (np.max(img16) - np.min(img16)) * 255).astype(np.uint8)
