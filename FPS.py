@@ -8,8 +8,6 @@ from scipy.stats import binned_statistic_2d
 import matplotlib.dates as mdates
 import rasterio
 import cartopy.crs as ccrs
-from rasterio.transform import rowcol
-
 
 # This file is the summary analysis file for the surfzone test, the first few commented lines process and save the data by using
 # functions from other scripts. We are using the pickle module in order to write the data as bytes into a txt file. The rest of the

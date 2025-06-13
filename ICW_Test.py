@@ -1,6 +1,6 @@
 from post_processing.HydroSurveyor.process_file_HydroSurveyor import Hydro_process
 import matplotlib.pyplot as plt
-from post_processing.HydroSurveyor.process_session_HydroSurveyor import Hydro_session_process 
+from post_processing.HydroSurveyor.old.process_session_HydroSurveyor import Hydro_session_process 
 from scipy.signal import medfilt
 from post_processing.ADCP.process_Sig1k import process
 from post_processing.HydroSurveyor.read_HydroSurveyor import vector_df
