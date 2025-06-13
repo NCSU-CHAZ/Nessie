@@ -358,4 +358,4 @@ def geoplot(Data, bin_number):
 
 # vel_plot_no_interp(CombinedData)
 
-geoplot(CombinedData,bin_number = 20)
+geoplot(CombinedData,bin_number = 30)
