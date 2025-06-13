@@ -238,17 +238,18 @@ def geoplot(Data, bin_number):
         r"Z:\BHI_NearshoreJetskiSurvey_Data\2025_05_01\2025_04_29_Sentinel-2_BH_Sattelite.tiff"
     )
     
-    dst_crs = 'EPSG:3857'
-    transform, width, height = rasterio.warp.calculate_default_transform(
-        src.crs, dst_crs, src.width, src.height, *src.bounds)
-    kwargs = src.meta.copy()
-    kwargs.update({
-        'crs': dst_crs,
-        'transform': transform,
-        'width': width,
-        'height': height
-    })
-    print(src.crs)
+    """The lines below are for if you suspect a datum mismatch"""
+    # dst_crs = 'EPSG:3857'
+    # transform, width, height = rasterio.warp.calculate_default_transform(
+    #     src.crs, dst_crs, src.width, src.height, *src.bounds)
+    # kwargs = src.meta.copy()
+    # kwargs.update({
+    #     'crs': dst_crs,
+    #     'transform': transform,
+    #     'width': width,
+    #     'height': height
+    # })
+    # print(src.crs)
 
     # with rasterio.open(r"Z:\BHI_NearshoreJetskiSurvey_Data\2025_05_01\good_coords.tiff", 'w', **kwargs) as dst:
     #     for i in range(1, src.count + 1):
@@ -261,7 +262,7 @@ def geoplot(Data, bin_number):
     #             dst_crs=dst_crs,
     #             resampling=rasterio.warp.Resampling.nearest)
 
-    # dst = rasterio.open(r"Z:\BHI_NearshoreJetskiSurvey_Data\2025_05_01\good_coords.tiff")
+    # src = rasterio.open(r"Z:\BHI_NearshoreJetskiSurvey_Data\2025_05_01\good_coords.tiff")
 
     img16 = src.read()
     img8 = ((img16 - np.min(img16)) / (np.max(img16) - np.min(img16)) * 255).astype(np.uint8)
@@ -270,14 +271,31 @@ def geoplot(Data, bin_number):
     x = np.ravel(CombinedData["Longitude"])
     y = np.ravel(CombinedData["Latitude"])
 
-    # Bin the data
-    Easting, xedges, yedges, ___ = binned_statistic_2d(
+
+    # Get a grid of bins in order to bin the data
+    _, xedges, yedges, ___ = binned_statistic_2d(
         x, y, E, statistic="mean", bins=bin_number
     )
-    
-    Northing, xedges, yedges, ___ = binned_statistic_2d(
-        x, y, N, statistic="mean", bins=bin_number
-    )
+
+    # Get bin indices for each point
+    x_idx = np.digitize(x, xedges) - 1
+    y_idx = np.digitize(y, yedges) - 1
+
+    # Prepare result arrays
+    nx = len(xedges) - 1
+    ny = len(yedges) - 1
+
+    Easting = np.full((ny, nx), np.nan)
+    Northing = np.full((ny, nx), np.nan)
+
+    # Bin each cell manually
+    for i in range(nx):
+        for j in range(ny):
+            mask = (x_idx == i) & (y_idx == j)
+            if np.any(mask):
+                Easting[j, i] = np.nanmean(E[mask])
+                Northing[j, i] = np.nanmean(N[mask])
+
 
     speed = np.sqrt(Easting**2 + Northing**2)
     # Grid centers for plotting
@@ -300,7 +318,17 @@ def geoplot(Data, bin_number):
     gl.top_labels = gl.right_labels = False
 
     #This shows the path
-    ax.scatter(xcenters,ycenters)
+    # ax.scatter(x,y,c = 'black')
+
+    #This shows the binning grid
+    # for xe in xedges:
+    #     ax.plot([xe, xe], [yedges[0], yedges[-1]], color='gray', linewidth=0.5, transform=ccrs.PlateCarree())
+    # for ye in yedges:
+    #     ax.plot([xedges[0], xedges[-1]], [ye, ye], color='gray', linewidth=0.5, transform=ccrs.PlateCarree())
+
+    #This shows which bins have data
+    # mask = ~np.isnan(Easting) & ~np.isnan(Northing)
+    # ax.scatter(lon[mask], lat[mask], c='red', s=10, transform=ccrs.PlateCarree(), label="Non-empty bins")
 
     # This shows the velocity vectors
     q = ax.quiver(
@@ -317,9 +345,8 @@ def geoplot(Data, bin_number):
 
     ax.set_xlabel("Longitude")
     ax.set_ylabel("Latitude")
-    plt.title("Velocity Vectors for BHI Data Collection on 5/1/25 for 12/04")
+    plt.title("Velocity Vectors for BHI Data Collection on 5/1/25")
     plt.show()
-
 
 # adcp_comparison_Abs(CombinedData)
 
