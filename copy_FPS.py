@@ -1,4 +1,4 @@
-from post_processing.HydroSurveyor.process_file_HydroSurveyor import Hydro_process
+from process_file_HydroSurveyor import Hydro_process
 import matplotlib.pyplot as plt
 import pandas as pd
 import numpy as np
@@ -15,20 +15,20 @@ from rasterio.transform import rowcol
 # script then loads the data using pickle and generates some plots. Some of the plots require other individual data streams to work.
 # To get these other data streams simple run hydroprocess on the raw data for whatever it needs to process.
 
-filepath = r"files/1_M9Hydro_Corrected.mat"
+filepath = r"D:\Research\Hydro-JFE\Hydro_March\1_M9Hydro_Corrected.mat"
 interpsize = 2  # This would be .05m for the interpolated cell size
 shoreline_orientation = 112
 
 CombinedData = Hydro_process(
     filepath, interpsize, shoreline_orientation
- )
+)
 with open(
-    r"files/1_M9Hydro_Corrected_processed.txt", "wb"
+    r"1_M9Hydro_Corrected_processed.txt", "wb"
  ) as file:
     pickle.dump(CombinedData, file)
 
 with open(
-    r"files/1_M9Hydro_Corrected_processed.txt", "rb"
+    r"1_M9Hydro_Corrected_processed.txt", "rb"
 ) as file:
     CombinedData = pickle.load(file)
 
@@ -230,7 +230,7 @@ def vel_plot_no_interp(Data):
 
     plt.show()
 
-MapImage = r"D:\Research\Hydro-JFE\1_M9Hydro_Corrected2025-03-25_Sentinel-2.tiff"
+MapImage = r"D:\Research\Hydro-JFE\2025-03-27_Sentinel-2_(whole).tiff"
 def geoplot(Data, bin_number):
     # Open TIFF with rasterio
     src = rasterio.open(MapImage
@@ -241,7 +241,7 @@ def geoplot(Data, bin_number):
     N = np.nanmean(Data["NorthVel"], axis=1)
     x = np.ravel(CombinedData["Longitude"])
     y = np.ravel(CombinedData["Latitude"])
-
+    
     # Bin the data
     Easting, xedges, yedges, ___ = binned_statistic_2d(
         x, y, E, statistic="mean", bins=bin_number
@@ -303,20 +303,39 @@ def geoplot(Data, bin_number):
 
     # This shows the velocity vectors
     # q = ax.quiver(
-    #     lon,
-    #     lat,
-    #     Easting,
-    #     Northing,
-    #     speed,
-    #     transform=ccrs.PlateCarree(),
-    #     cmap="plasma",
-    #     scale=8,
+        # lon,
+        # lat,
+        # Easting,
+        # Northing,
+        # speed,
+        # transform=ccrs.PlateCarree(),
+        # cmap="plasma",
+        # scale=8,
     # )
     # cb = plt.colorbar(q, orientation="vertical", label="Speed (m/s)")
 
+    # num_nan_speed = np.isnan(speed).sum()
+    # num_vals_speed = speed.size
+    # num_nan_east = np.isnan(CombinedData["EastVel"]).to_numpy().sum()
+    # num_nan_north = np.isnan(CombinedData["NorthVel"]).to_numpy().sum()
+    # num_vals_east = CombinedData["EastVel"].size
+    # num_vals_north = CombinedData["NorthVel"].size
+    
+    # print(f"Number of NaNs in Easting: {num_nan_east}")
+    # print(f"Number of values in Easting: {num_vals_east}")
+    # print(f"Number of NaNs in Northing: {num_nan_north}")
+    # print(f"Number of values in Northing: {num_vals_north}")
+    # print(f"Number of NaNs in speed: {num_nan_speed}")
+    # print(f"Number of values in speed: {num_vals_speed}")
+    # print(np.sum(~np.isnan(speed)))
+    valid = ~np.isnan(speed)
+    print("Valid vector locations (lon, lat):", lon[valid], lat[valid])
+
+    
     ax.set_xlabel("Longitude")
     ax.set_ylabel("Latitude")
-    plt.title("Velocity Vectors for BHI Data Collection on 5/1/25")
+    plt.title("Velocity Vectors for CB Data Collected 3/23/25")
+    plt.savefig("geoplot.png")    
     plt.show()
 
 
