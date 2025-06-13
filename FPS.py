@@ -1,3 +1,4 @@
+import rasterio.warp
 from post_processing.HydroSurveyor.process_file_HydroSurveyor import Hydro_process
 import matplotlib.pyplot as plt
 import pandas as pd
@@ -27,7 +28,7 @@ interpsize = 2  # This would be .05m for the interpolated cell size
 #     pickle.dump(CombinedData, file)
 
 with open(
-    r"Z:\BHI_NearshoreJetskiSurvey_Data\2024_12_04\2024_12_04_processed.txt",
+    r"Z:\BHI_NearshoreJetskiSurvey_Data\2025_05_01\2025_05_01_processed.txt",
     "rb",
 ) as file:
     CombinedData = pickle.load(file)
@@ -236,6 +237,32 @@ def geoplot(Data, bin_number):
     src = rasterio.open(
         r"Z:\BHI_NearshoreJetskiSurvey_Data\2025_05_01\2025_04_29_Sentinel-2_BH_Sattelite.tiff"
     )
+    
+    dst_crs = 'EPSG:3857'
+    transform, width, height = rasterio.warp.calculate_default_transform(
+        src.crs, dst_crs, src.width, src.height, *src.bounds)
+    kwargs = src.meta.copy()
+    kwargs.update({
+        'crs': dst_crs,
+        'transform': transform,
+        'width': width,
+        'height': height
+    })
+    print(src.crs)
+
+    # with rasterio.open(r"Z:\BHI_NearshoreJetskiSurvey_Data\2025_05_01\good_coords.tiff", 'w', **kwargs) as dst:
+    #     for i in range(1, src.count + 1):
+    #         rasterio.warp.reproject(
+    #             source=rasterio.band(src, i),
+    #             destination=rasterio.band(dst, i),
+    #             src_transform=src.transform,
+    #             src_crs=src.crs,
+    #             dst_transform=transform,
+    #             dst_crs=dst_crs,
+    #             resampling=rasterio.warp.Resampling.nearest)
+
+    # dst = rasterio.open(r"Z:\BHI_NearshoreJetskiSurvey_Data\2025_05_01\good_coords.tiff")
+
     img16 = src.read()
     img8 = ((img16 - np.min(img16)) / (np.max(img16) - np.min(img16)) * 255).astype(np.uint8)
     E = np.nanmean(Data["EastVel"], axis=1)
@@ -247,7 +274,7 @@ def geoplot(Data, bin_number):
     Easting, xedges, yedges, ___ = binned_statistic_2d(
         x, y, E, statistic="mean", bins=bin_number
     )
-
+    
     Northing, xedges, yedges, ___ = binned_statistic_2d(
         x, y, N, statistic="mean", bins=bin_number
     )
@@ -259,34 +286,31 @@ def geoplot(Data, bin_number):
     lon, lat = np.meshgrid(xcenters, ycenters)
 
     # Instantiate tile object
-    fig, ax = plt.subplots(
-        figsize=(10, 10), subplot_kw={"projection": ccrs.PlateCarree()}
-    )
-
+    fig, ax = plt.subplots(figsize=(10, 10), subplot_kw={"projection": ccrs.PlateCarree()})
+    
     # Show image with correct extent
     extent = src.bounds  # left, bottom, right, top
     ax.imshow(
         img8.transpose(1, 2, 0),
         origin="upper",
-        extent=[extent.left, extent.right, extent.bottom, extent.top],
-        transform=ccrs.PlateCarree(),
+        extent=[extent.left, extent.right, extent.bottom, extent.top], transform = ccrs.PlateCarree(),
     )
 
     gl = ax.gridlines(draw_labels=True, linestyle="--")
     gl.top_labels = gl.right_labels = False
 
     #This shows the path
-    # ax.scatter(lon,lat)
+    ax.scatter(xcenters,ycenters)
 
-    #This shows the velocity vectors
+    # This shows the velocity vectors
     q = ax.quiver(
         lon,
         lat,
         Easting,
         Northing,
         speed,
-        transform=ccrs.PlateCarree(),
         cmap="plasma",
+        transform = ccrs.PlateCarree(),
         scale=8,
     )
     cb = plt.colorbar(q, orientation="vertical", label="Speed (m/s)")
@@ -297,11 +321,11 @@ def geoplot(Data, bin_number):
     plt.show()
 
 
-adcp_comparison_Abs(CombinedData)
+# adcp_comparison_Abs(CombinedData)
 
 # bathy_plot(CombinedData)
 
-mesh_plot(CombinedData)
+# mesh_plot(CombinedData)
 
 # depth_velocity_plot(CombinedData)
 
