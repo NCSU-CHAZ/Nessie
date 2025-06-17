@@ -311,8 +311,10 @@ def geoplot(Data, bin_number):
     ax.imshow(
         img8.transpose(1, 2, 0),
         origin="upper",
+        extent=[extent.left, extent.right, extent.bottom, extent.top],
+        transform=ccrs.PlateCarree(),
     )
-
+    
     gl = ax.gridlines(draw_labels=True, linestyle="--")
     gl.top_labels = gl.right_labels = False
 
