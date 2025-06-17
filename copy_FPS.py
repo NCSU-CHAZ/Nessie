@@ -230,26 +230,73 @@ def vel_plot_no_interp(Data):
 
     plt.show()
 
-MapImage = r"D:\Research\Hydro-JFE\2025-03-27_Sentinel-2_(whole).tiff"
+MapImage = r"D:\Research\Hydro-JFE\2025-03-20_Sentinel-2_MARCH.tiff"
 def geoplot(Data, bin_number):
     # Open TIFF with rasterio
-    src = rasterio.open(MapImage
+    src = rasterio.open(
+        MapImage
     )
+    
+    """The lines below are for if you suspect a datum mismatch"""
+    # dst_crs = 'EPSG:3857'
+    # transform, width, height = rasterio.warp.calculate_default_transform(
+        # src.crs, dst_crs, src.width, src.height, *src.bounds)
+    # kwargs = src.meta.copy()
+    # kwargs.update({
+        # 'crs': dst_crs,
+        # 'transform': transform,
+        # 'width': width,
+        # 'height': height
+    # })
+    # print(src.crs)
+
+    # with rasterio.open(MapImage, 'w', **kwargs) as dst:
+        # for i in range(1, src.count + 1):
+            # rasterio.warp.reproject(
+                # source=rasterio.band(src, i),
+                # destination=rasterio.band(dst, i),
+                # src_transform=src.transform,
+                # src_crs=src.crs,
+                # dst_transform=transform,
+                # dst_crs=dst_crs,
+                # resampling=rasterio.warp.Resampling.nearest)
+
+    src = rasterio.open(MapImage)
+
     img16 = src.read()
     img8 = ((img16 - np.min(img16)) / (np.max(img16) - np.min(img16)) * 255).astype(np.uint8)
     E = np.nanmean(Data["EastVel"], axis=1)
     N = np.nanmean(Data["NorthVel"], axis=1)
     x = np.ravel(CombinedData["Longitude"])
     y = np.ravel(CombinedData["Latitude"])
-    
-    # Bin the data
-    Easting, xedges, yedges, ___ = binned_statistic_2d(
-        x, y, E, statistic="mean", bins=bin_number
+
+
+    # Get a grid of bins in order to bin the data
+    extent = src.bounds  # left, bottom, right, top
+    _, xedges, yedges, ___ = binned_statistic_2d(
+        x, y, E, statistic="mean", bins=bin_number,
+    range=[[extent.left, extent.right], [extent.bottom, extent.top]]
     )
 
-    Northing, xedges, yedges, ___ = binned_statistic_2d(
-        x, y, N, statistic="mean", bins=bin_number
-    )
+    # Get bin indices for each point
+    x_idx = np.digitize(x, xedges) - 1
+    y_idx = np.digitize(y, yedges) - 1
+
+    # Prepare result arrays
+    nx = len(xedges) - 1
+    ny = len(yedges) - 1
+
+    Easting = np.full((ny, nx), np.nan)
+    Northing = np.full((ny, nx), np.nan)
+
+    # Bin each cell manually
+    for i in range(nx):
+        for j in range(ny):
+            mask = (x_idx == i) & (y_idx == j)
+            if np.any(mask):
+                Easting[j, i] = np.nanmean(E[mask])
+                Northing[j, i] = np.nanmean(N[mask])
+
 
     speed = np.sqrt(Easting**2 + Northing**2)
     # Grid centers for plotting
@@ -258,86 +305,48 @@ def geoplot(Data, bin_number):
     lon, lat = np.meshgrid(xcenters, ycenters)
 
     # Instantiate tile object
-    fig, ax = plt.subplots(
-        figsize=(10, 10), subplot_kw={"projection": ccrs.PlateCarree()}
-    )
-
-    # Assume land is brighter (you may need to experiment or use a specific band)
-    # grayscale = img8[0]  # Use one band (e.g., red), or average for intensity
-    # threshold = 100  # Tune this value!
-    # land_mask = grayscale > threshold  # True = land, False = water
-
-    # # Convert lat/lon mesh to raster row/col
-    # rows, cols = rowcol(src.transform, lon, lat)
-
-    # # Make sure indices are valid
-    # valid_mask = (rows >= 0) & (rows < src.height) & (cols >= 0) & (cols < src.width)
-
-    # # Initialize mask as all True (masked)
-    # plot_mask = np.full(lon.shape, False)
-
-    # # Apply mask only to valid raster coordinates
-    # for i in range(lon.shape[0]):
-    #     for j in range(lon.shape[1]):
-    #         if valid_mask[i, j]:
-    #             plot_mask[i, j] = not land_mask[rows[i, j], cols[i, j]]
-
-    # # Apply the mask
-    # Easting_masked = np.where(plot_mask, Easting, np.nan)
-    # Northing_masked = np.where(plot_mask, Northing, np.nan)
-
+    fig, ax = plt.subplots(figsize=(10, 10), subplot_kw={"projection": ccrs.PlateCarree()})
+    
     # Show image with correct extent
-    extent = src.bounds  # left, bottom, right, top
     ax.imshow(
         img8.transpose(1, 2, 0),
         origin="upper",
-        extent=[extent.left, extent.right, extent.bottom, extent.top],
-        transform=ccrs.PlateCarree(),
     )
 
     gl = ax.gridlines(draw_labels=True, linestyle="--")
     gl.top_labels = gl.right_labels = False
 
     #This shows the path
-    # ax.scatter(lon,lat)
+    # ax.scatter(x,y,c = 'black')
+
+    #This shows the binning grid
+    # for xe in xedges:
+    #     ax.plot([xe, xe], [yedges[0], yedges[-1]], color='gray', linewidth=0.5, transform=ccrs.PlateCarree())
+    # for ye in yedges:
+    #     ax.plot([xedges[0], xedges[-1]], [ye, ye], color='gray', linewidth=0.5, transform=ccrs.PlateCarree())
+
+    # This shows which bins have data
+    # mask = ~np.isnan(Easting) & ~np.isnan(Northing)
+    # ax.scatter(lon[mask], lat[mask], c='red', s=10, transform=ccrs.PlateCarree(), label="Non-empty bins")
+    # print("Valid vector locations (lon, lat):", lon[mask], lat[mask])
 
     # This shows the velocity vectors
-    # q = ax.quiver(
-        # lon,
-        # lat,
-        # Easting,
-        # Northing,
-        # speed,
-        # transform=ccrs.PlateCarree(),
-        # cmap="plasma",
-        # scale=8,
-    # )
-    # cb = plt.colorbar(q, orientation="vertical", label="Speed (m/s)")
+    q = ax.quiver(
+        lon,
+        lat,
+        Easting,
+        Northing,
+        speed,
+        cmap="plasma",
+        transform = ccrs.PlateCarree(),
+        scale=8,
+    )
+    cb = plt.colorbar(q, orientation="vertical", label="Speed (m/s)")
 
-    # num_nan_speed = np.isnan(speed).sum()
-    # num_vals_speed = speed.size
-    # num_nan_east = np.isnan(CombinedData["EastVel"]).to_numpy().sum()
-    # num_nan_north = np.isnan(CombinedData["NorthVel"]).to_numpy().sum()
-    # num_vals_east = CombinedData["EastVel"].size
-    # num_vals_north = CombinedData["NorthVel"].size
-    
-    # print(f"Number of NaNs in Easting: {num_nan_east}")
-    # print(f"Number of values in Easting: {num_vals_east}")
-    # print(f"Number of NaNs in Northing: {num_nan_north}")
-    # print(f"Number of values in Northing: {num_vals_north}")
-    # print(f"Number of NaNs in speed: {num_nan_speed}")
-    # print(f"Number of values in speed: {num_vals_speed}")
-    # print(np.sum(~np.isnan(speed)))
-    valid = ~np.isnan(speed)
-    print("Valid vector locations (lon, lat):", lon[valid], lat[valid])
-
-    
     ax.set_xlabel("Longitude")
     ax.set_ylabel("Latitude")
-    plt.title("Velocity Vectors for CB Data Collected 3/23/25")
-    plt.savefig("geoplot.png")    
+    plt.title("Velocity Vectors for CB Data Collection on 3/13/25")
     plt.show()
-
 
 # adcp_comparison_Abs(CombinedData)
 
