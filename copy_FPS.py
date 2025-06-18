@@ -10,25 +10,28 @@ import cartopy.crs as ccrs
 from rasterio.transform import rowcol
 
 
-# This file is the summary analysis file for the surfzone test, the first few commented lines process and save the data by using
+# This file is the summary analysis file for the surfzone test, the first few lines process and save the data by using
 # functions from other scripts. We are using the pickle module in order to write the data as bytes into a txt file. The rest of the
-# script then loads the data using pickle and generates some plots. Some of the plots require other individual data streams to work.
-# To get these other data streams simple run hydroprocess on the raw data for whatever it needs to process.
+# script then loads the data using pickle and generates some plots. 
 
-filepath = r"D:\Research\Hydro-JFE\Hydro_March\1_M9Hydro_Corrected.mat"
+#Variables for Hydro_process function (user input)
+filepath = r"D:\Research\Hydro-JFE\Hydro_March\1_M9Hydro_Corrected.mat" # mat file containing processed data
 interpsize = 2  # This would be .05m for the interpolated cell size
 shoreline_orientation = 112
+txtfile = r"1_M9Hydro_Corrected_processed.txt" # Name of txt file written from mat file
 
+# Convert mat file into txt file
 CombinedData = Hydro_process(
     filepath, interpsize, shoreline_orientation
 )
 with open(
-    r"1_M9Hydro_Corrected_processed.txt", "wb"
- ) as file:
+    txtfile, "wb"
+) as file:
     pickle.dump(CombinedData, file)
 
+# Load data using pickle 
 with open(
-    r"1_M9Hydro_Corrected_processed.txt", "rb"
+    txtfile, "rb"
 ) as file:
     CombinedData = pickle.load(file)
 
@@ -106,6 +109,7 @@ def bathy_plot(CombinedData):
 
     plt.show()
 
+MapImage = r"D:\Research\Hydro-JFE\2025-03-20_Sentinel-2_(march_bathy) (2).tiff" #TIFF file for plot (user input)
 def geospatial_bathy_plot(CombinedData):
     # Sample data: Replace with your actual longitude, latitude, and depth values
     x = CombinedData["Longitude"]  # Longitude
@@ -119,7 +123,6 @@ def geospatial_bathy_plot(CombinedData):
     z = z[mask]
 
     # Read geospatial image
-    MapImage = r"D:\Research\Hydro-JFE\2025-03-20_Sentinel-2_(march_bathy) (2).tiff"
     src = rasterio.open(MapImage)
     img16 = src.read()
     img8 = ((img16 - np.min(img16)) / (np.max(img16) - np.min(img16)) * 255).astype(np.uint8)
