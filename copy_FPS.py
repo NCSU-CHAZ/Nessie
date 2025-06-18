@@ -82,6 +82,12 @@ def bathy_plot(CombinedData):
     y = CombinedData["Latitude"]  # Latitude
     z = CombinedData["VbDepth"]  # Depth (negative for bathymetry)
 
+    # Exclude points where both longitude and latitude are 0
+    mask = ~((x == 0) & (y == 0))
+    x = x[mask]
+    y = y[mask]
+    z = z[mask]
+    
     # Create 3D figure
     fig = plt.figure()
     ax = fig.add_subplot(111, projection="3d")
@@ -107,6 +113,12 @@ def mesh_plot(CombinedData):
     y = np.ravel(CombinedData["Latitude"])
     z = np.ravel(CombinedData["VbDepth"])
 
+    # Exclude points where both longitude and latitude are 0
+    mask = ~((x == 0) & (y == 0))
+    x = x[mask]
+    y = y[mask]
+    z = z[mask]
+    
     bins = 50
 
     # Bins x, y, z into a 2D grid and averages z in each bin.
