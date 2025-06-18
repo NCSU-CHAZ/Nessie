@@ -106,6 +106,51 @@ def bathy_plot(CombinedData):
 
     plt.show()
 
+def geospatial_bathy_plot(CombinedData):
+    # Sample data: Replace with your actual longitude, latitude, and depth values
+    x = CombinedData["Longitude"]  # Longitude
+    y = CombinedData["Latitude"]  # Latitude
+    z = CombinedData["VbDepth"]  # Depth (negative for bathymetry)
+
+    # Exclude points where both longitude and latitude are 0
+    mask = ~((x == 0) & (y == 0))
+    x = x[mask]
+    y = y[mask]
+    z = z[mask]
+
+    # Read geospatial image
+    MapImage = r"D:\Research\Hydro-JFE\2025-03-20_Sentinel-2_(march_bathy) (2).tiff"
+    src = rasterio.open(MapImage)
+    img16 = src.read()
+    img8 = ((img16 - np.min(img16)) / (np.max(img16) - np.min(img16)) * 255).astype(np.uint8)
+    extent = src.bounds  # left, bottom, right, top
+
+    # Create 2D figure
+    fig, ax = plt.subplots(figsize=(10, 10))
+
+    # Show geospatial image
+    ax.imshow(
+        img8.transpose(1, 2, 0),
+        origin="upper",
+        extent=[extent.left, extent.right, extent.bottom, extent.top],
+        aspect="equal",
+    )
+
+    # Scatter plot of bathymetry data
+    sc = ax.scatter(x, y, c=z, cmap="viridis_r", s=20)
+    cbar = plt.colorbar(sc, ax=ax, shrink=0.5, aspect=5)
+    cbar.set_label("Depth (meters)")
+    
+    # Set labels and title
+    ax.set_xlabel("Longitude")
+    ax.set_ylabel("Latitude")
+    ax.set_xlim(extent.left, extent.right)
+    ax.set_ylim(extent.bottom, extent.top)
+
+    plt.title("Bathymetry Survey with Geospatial Image")
+    plt.savefig("bathyplot.png")    
+    plt.show()
+
 
 def mesh_plot(CombinedData):
     # Assign data and choose number of bins for 3d grid
@@ -365,6 +410,8 @@ def geoplot(Data, bin_number):
 # adcp_comparison_Abs(CombinedData)
 
 # bathy_plot(CombinedData)
+
+#geospatial_bathy_plot(CombinedData)
 
 # mesh_plot(CombinedData)
 
