@@ -144,6 +144,8 @@ def geospatial_bathy_plot(CombinedData):
     # Set labels and title
     ax.set_xlabel("Longitude")
     ax.set_ylabel("Latitude")
+
+    # Set range limit for axes
     ax.set_xlim(extent.left, extent.right)
     ax.set_ylim(extent.bottom, extent.top)
 
@@ -404,8 +406,11 @@ def geoplot(Data, bin_number):
 
     ax.set_xlabel("Longitude")
     ax.set_ylabel("Latitude")
-    plt.title("Velocity Vectors for CB Data Collection on 3/13/25")
+    ax.set_xlim(extent.left, extent.right)
+    ax.set_ylim(extent.bottom, extent.top)
+    plt.title("Velocity Vectors for CB Data Collection on 5/27/25")
     plt.show()
+
 
 # adcp_comparison_Abs(CombinedData)
 
