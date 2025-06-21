@@ -291,6 +291,7 @@ def vel_plot_no_interp(Data):
     ax.set_title("Velocity over Time and Depth")
     ax.xaxis.set_major_formatter(mdates.DateFormatter("%Y-%m-%d\n%H:%M"))
     ax.set_ylim(0, 10)
+    ax.invert_yaxis()
     fig.autofmt_xdate()
     plt.colorbar(ax.collections[0], ax=ax, label="Velocity (m/s)")
 
