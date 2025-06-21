@@ -16,8 +16,8 @@ from rasterio.transform import rowcol
 
 #Variables for Hydro_process function (user input)
 filepath = r"D:\Research\Hydro-JFE\Hydro_March\1_M9Hydro_Corrected.mat" # mat file containing processed data
-interpsize = 2  # This would be .05m for the interpolated cell size
-shoreline_orientation = 112
+interpsize = 1  # This would be .05m for the interpolated cell size
+shoreline_orientation = 23
 txtfile = r"1_M9Hydro_Corrected_processed.txt" # Name of txt file written from mat file
 
 # Convert mat file into txt file
