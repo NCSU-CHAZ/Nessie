@@ -104,7 +104,7 @@ def bathy_plot(CombinedData):
     ax.set_xlabel("Longitude")
     ax.set_ylabel("Latitude")
     ax.set_zlabel("Depth")
-    # ax.invert_zaxis()
+    ax.invert_zaxis()
     plt.title("3D Bathymetry Survey")
 
     plt.show()
@@ -223,6 +223,10 @@ def depth_velocity_plot(Data):
     axs[0].set_ylim(0, np.max(Data["VbDepth_m"]))
     axs[1].set_ylim(0, np.max(Data["VbDepth_m"]))
     axs[2].set_ylim(0, np.max(Data["VbDepth_m"]))
+
+    axs[0].invert_yaxis()
+    axs[1].invert_yaxis()    
+    axs[2].invert_yaxis()
 
     cb1 = fig.colorbar(im1, ax=axs[0])
     cb2 = fig.colorbar(im2, ax=axs[1])
