@@ -100,7 +100,7 @@ def Hydro_process(filepath, interpsize, shoreline_orientation):
     rawdata, WaterEastVel, WaterNorthVel, WaterVertVel, WaterErrVal, Info = vector_df(
         filepath
     )
-
+    #Remove the boat velocity from the water velocity to get the actual water velocity
     EastVel = WaterEastVel.subtract(rawdata["BtVelEnu_m_s"].iloc[:, 0], axis=0)
     NorthVel = WaterNorthVel.subtract(rawdata["BtVelEnu_m_s"].iloc[:, 1], axis=0)
     VertVel = WaterVertVel.subtract(rawdata["BtVelEnu_m_s"].iloc[:, 2], axis=0)

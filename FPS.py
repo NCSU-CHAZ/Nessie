@@ -16,14 +16,15 @@ import cartopy.crs as ccrs
 
 interpsize = 2  # This would be .05m for the interpolated cell size
 
-# CombinedData = Hydro_process(
-#     r"Z:\BHI_NearshoreJetskiSurvey_Data\2024_12_04\SecondExtract\1_M9Hydro.mat",
-#     interpsize, 115
-# )
-# with open(
-#     r"Z:\BHI_NearshoreJetskiSurvey_Data\2024_12_04\2024_12_04_processed.txt", "wb"
-# ) as file:
-#     pickle.dump(CombinedData, file)
+CombinedData = Hydro_process(
+    r"Z:\BHI_NearshoreJetskiSurvey_Data\2024_12_04\SecondExtract\1_M9Hydro.mat",
+    interpsize, 115
+)
+
+with open(
+    r"Z:\BHI_NearshoreJetskiSurvey_Data\2024_12_04\2024_12_04_processed.txt", "wb"
+) as file:
+    pickle.dump(CombinedData, file)
 
 with open(
     r"Z:\BHI_NearshoreJetskiSurvey_Data\2025_05_01\2025_05_01_processed.txt",
