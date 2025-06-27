@@ -16,15 +16,15 @@ import cartopy.crs as ccrs
 
 interpsize = 2  # This would be .05m for the interpolated cell size
 
-CombinedData = Hydro_process(
-    r"Z:\BHI_NearshoreJetskiSurvey_Data\2024_12_04\SecondExtract\1_M9Hydro.mat",
-    interpsize, 115
-)
+# CombinedData = Hydro_process(
+#     r"Z:\BHI_NearshoreJetskiSurvey_Data\2024_12_04\SecondExtract\1_M9Hydro.mat",
+#     interpsize, 115
+# )
 
-with open(
-    r"Z:\BHI_NearshoreJetskiSurvey_Data\2024_12_04\2024_12_04_processed.txt", "wb"
-) as file:
-    pickle.dump(CombinedData, file)
+# with open(
+#     r"Z:\BHI_NearshoreJetskiSurvey_Data\2024_12_04\2024_12_04_processed.txt", "wb"
+# ) as file:
+#     pickle.dump(CombinedData, file)
 
 with open(
     r"Z:\BHI_NearshoreJetskiSurvey_Data\2025_05_01\2025_05_01_processed.txt",
@@ -233,9 +233,11 @@ def vel_plot_no_interp(Data):
 
 def geoplot(Data, bin_number):
     # Open TIFF with rasterio
+    #"Z:\BHI_NearshoreJetskiSurvey_Data\2024_12_04\2024-11-30-00_00_2024-11-30-23_59_Sentinel-2_L2A_True_color.tiff"
     src = rasterio.open(
         r"Z:\BHI_NearshoreJetskiSurvey_Data\2025_05_01\2025_04_29_Sentinel-2_BH_Sattelite.tiff"
     )
+
     
     """The lines below are for if you suspect a datum mismatch"""
     # dst_crs = 'EPSG:3857'
@@ -342,12 +344,55 @@ def geoplot(Data, bin_number):
     )
     cb = plt.colorbar(q, orientation="vertical", label="Speed (m/s)")
 
-    ax.set_xlabel("Longitude")
-    ax.set_ylabel("Latitude")
-    plt.title("Velocity Vectors for BHI Data Collection on 5/1/25")
+    plt.xlabel("Longitude")
+    plt.ylabel("Latitude")
+    plt.title("Velocity Vectors for BHI Data Collection on 05/01/25")
     plt.show()
 
-# adcp_comparison_Abs(CombinedData)
+
+def geo_bathyplot(Data,tiff_path):
+    # Sample data: Replace with your actual longitude, latitude, and depth values
+    x = CombinedData["Longitude"]  # Longitude
+    y = CombinedData["Latitude"]  # Latitude
+    z = CombinedData["VbDepth"]  # Depth (negative for bathymetry)
+
+    # Exclude points where both longitude and latitude are 0
+    mask = ~((x == 0) & (y == 0))
+    x = x[mask]
+    y = y[mask]
+    z = z[mask]
+    # Read geospatial image
+    src = rasterio.open(tiff_path)
+    img16 = src.read()
+    img8 = ((img16 - np.min(img16)) / (np.max(img16) - np.min(img16)) * 255).astype(np.uint8)
+    extent = src.bounds  # left, bottom, right, top
+    # Create 2D figure
+    fig, ax = plt.subplots(figsize=(10, 10))
+    
+    # Show geospatial image
+    ax.imshow(
+        img8.transpose(1, 2, 0),
+        origin="upper",
+        extent=[extent.left, extent.right, extent.bottom, extent.top],
+        aspect="equal",
+    )
+
+    # Scatter plot of bathymetry data
+    sc = ax.scatter(x, y, c=z, cmap="viridis_r", s=20)
+    cbar = plt.colorbar(sc, ax=ax, shrink=0.5, aspect=5)
+    cbar.set_label("Depth (meters)")
+    
+    # Set labels and title
+    ax.set_xlabel("Longitude")
+    ax.set_ylabel("Latitude")
+    
+    # Set range limit for axes
+    ax.set_xlim(extent.left, extent.right)
+    ax.set_ylim(extent.bottom, extent.top)
+    plt.title("Bathymetry Survey for 05/01/25")
+    plt.show()
+
+#adcp_comparison_Abs(CombinedData)
 
 # bathy_plot(CombinedData)
 
@@ -358,3 +403,5 @@ def geoplot(Data, bin_number):
 # vel_plot_no_interp(CombinedData)
 
 geoplot(CombinedData,bin_number = 30)
+
+geo_bathyplot(CombinedData,r"Z:\BHI_NearshoreJetskiSurvey_Data\2025_05_01\2025_04_29_Sentinel-2_BH_Sattelite.tiff")
