@@ -27,7 +27,7 @@ interpsize = 2  # This would be .05m for the interpolated cell size
 #     pickle.dump(CombinedData, file)
 
 with open(
-    r"Z:\BHI_NearshoreJetskiSurvey_Data\2025_05_01\2025_05_01_processed.txt",
+    r"Z:\BHI_NearshoreJetskiSurvey_Data\2025_10_25_BHISurvey\2025_10_25_BHISurvey\processed.txt",
     "rb",
 ) as file:
     CombinedData = pickle.load(file)
@@ -235,7 +235,7 @@ def geoplot(Data, bin_number):
     # Open TIFF with rasterio
     #"Z:\BHI_NearshoreJetskiSurvey_Data\2024_12_04\2024-11-30-00_00_2024-11-30-23_59_Sentinel-2_L2A_True_color.tiff"
     src = rasterio.open(
-        r"Z:\BHI_NearshoreJetskiSurvey_Data\2025_05_01\2025_04_29_Sentinel-2_BH_Sattelite.tiff"
+       r"Z:\BHI_NearshoreJetskiSurvey_Data\2025_10_25_BHISurvey\2025-10-26-00_00_2025-10-26-23_59_Sentinel-2_L2A_True_color.tiff"
     )
 
     
@@ -331,6 +331,14 @@ def geoplot(Data, bin_number):
     # mask = ~np.isnan(Easting) & ~np.isnan(Northing)
     # ax.scatter(lon[mask], lat[mask], c='red', s=10, transform=ccrs.PlateCarree(), label="Non-empty bins")
 
+    # Example: remove bin at (row j, column i)
+    i_bad = 23  
+    j_bad = 20    
+
+    Easting[j_bad, i_bad]  = np.nan
+    Northing[j_bad, i_bad] = np.nan
+    speed[j_bad, i_bad] = np.nan
+    
     # This shows the velocity vectors
     q = ax.quiver(
         lon,
@@ -343,10 +351,11 @@ def geoplot(Data, bin_number):
         scale=8,
     )
     cb = plt.colorbar(q, orientation="vertical", label="Speed (m/s)")
+    q.set_clim(0, .8)
 
     plt.xlabel("Longitude")
     plt.ylabel("Latitude")
-    plt.title("Velocity Vectors for BHI Data Collection on 05/01/25")
+    plt.title("Velocity Vectors for BHI Data Collection on 10/25/25")
     plt.show()
 
 
@@ -378,7 +387,7 @@ def geo_bathyplot(Data,tiff_path):
     )
 
     # Scatter plot of bathymetry data
-    sc = ax.scatter(x, y, c=z, cmap="viridis_r", s=20)
+    sc = ax.scatter(x, y, c=z, cmap="viridis_r", s=20, vmin=0, vmax=7)
     cbar = plt.colorbar(sc, ax=ax, shrink=0.5, aspect=5)
     cbar.set_label("Depth (meters)")
     
@@ -389,7 +398,7 @@ def geo_bathyplot(Data,tiff_path):
     # Set range limit for axes
     ax.set_xlim(extent.left, extent.right)
     ax.set_ylim(extent.bottom, extent.top)
-    plt.title("Bathymetry Survey for 05/01/25")
+    plt.title("Bathymetry Survey for 10/25/25")
     plt.show()
 
 #adcp_comparison_Abs(CombinedData)
@@ -404,4 +413,4 @@ def geo_bathyplot(Data,tiff_path):
 
 geoplot(CombinedData,bin_number = 30)
 
-geo_bathyplot(CombinedData,r"Z:\BHI_NearshoreJetskiSurvey_Data\2025_05_01\2025_04_29_Sentinel-2_BH_Sattelite.tiff")
+geo_bathyplot(CombinedData,r"Z:\BHI_NearshoreJetskiSurvey_Data\2025_10_25_BHISurvey\2025-10-26-00_00_2025-10-26-23_59_Sentinel-2_L2A_True_color.tiff")
